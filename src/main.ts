@@ -1,7 +1,0 @@
-import { testApiCall } from './test';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
-dotenv.config({ path: `.env.local`, override: true });
-
-testApiCall();
