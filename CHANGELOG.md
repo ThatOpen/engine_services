@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.1.7
+
+### Patch Changes
+
+- remove gaxios due to a bug in the browser
+
 ## 0.1.6
 
 ### Patch Changes

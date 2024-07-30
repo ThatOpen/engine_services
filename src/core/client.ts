@@ -1,5 +1,5 @@
 import axios, { Method } from 'axios';
-import gaxios from 'gaxios';
+import { Readable } from 'stream';
 import { UpdateItemDto, UpdateItemFolderDto } from '../types/item.dto';
 import {
   ComponentItem,
@@ -10,7 +10,6 @@ import {
   ItemVersion,
 } from '../types/items';
 import { CreateItemResponse, UpdateItemResponse } from '../types/response';
-import { Readable } from 'stream';
 
 const FOLDER_PATH = 'item/folder';
 const ITEM_PATH = 'item';
@@ -82,7 +81,7 @@ export class EngineServicesClient {
       ...query,
       accessToken: this.accessToken,
     };
-    const response = await gaxios.request<Readable>({
+    const response = await axios.request<Readable>({
       url,
       params,
       responseType: 'stream',

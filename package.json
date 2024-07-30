@@ -1,7 +1,7 @@
 {
   "name": "thatopen-services",
   "private": false,
-  "version": "0.1.6",
+  "version": "0.1.7",
   "main": "dist/index.js",
   "type": "module",
   "files": [
@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "prepare": "yarn build"
+    "version": "yarn build && yarn changeset && yarn changeset version && yarn changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
-    "dotenv": "^16.4.5",
-    "gaxios": "^6.7.0"
+    "dotenv": "^16.4.5"
   }
 }
