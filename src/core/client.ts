@@ -1,4 +1,5 @@
 import axios, { Method } from 'axios';
+import gaxios from 'gaxios';
 import { UpdateItemDto, UpdateItemFolderDto } from '../types/item.dto';
 import {
   ComponentItem,
@@ -9,9 +10,11 @@ import {
   ItemVersion,
 } from '../types/items';
 import { CreateItemResponse, UpdateItemResponse } from '../types/response';
+import { Readable } from 'stream';
 
 const FOLDER_PATH = 'item/folder';
 const ITEM_PATH = 'item';
+const PROCESS_PATH = 'processor';
 const ITEM_TYPE_FILE = 'FILE';
 const ITEM_TYPE_COMPONENT = 'TOOL';
 
@@ -70,6 +73,22 @@ export class EngineServicesClient {
     const response = await axios.request({ method, url, data: body, params });
 
     return response.data as T;
+  }
+
+  async #requestFile(path: string, requestData?: { query?: object }) {
+    const { query } = requestData || {};
+    const url = this.#buildUrl(path);
+    const params = {
+      ...query,
+      accessToken: this.accessToken,
+    };
+    const response = await gaxios.request<Readable>({
+      url,
+      params,
+      responseType: 'stream',
+    });
+
+    return response.data;
   }
 
   async listFolders(params: { parentFolderId?: string; archived?: boolean }) {
@@ -144,17 +163,11 @@ export class EngineServicesClient {
   }
 
   async downloadFile(fileId: string) {
-    return await this.#requestApi<Item>(
-      'GET',
-      `${ITEM_PATH}/${fileId}/download`,
-    );
+    return await this.#requestFile(`${ITEM_PATH}/${fileId}/download`);
   }
 
   async downloadFolder(folderId: string) {
-    return await this.#requestApi<Item>(
-      'GET',
-      `${FOLDER_PATH}/${folderId}/download`,
-    );
+    return await this.#requestFile(`${FOLDER_PATH}/${folderId}/download`);
   }
 
   async #createItem<T = Item, P extends object = object>(
@@ -289,6 +302,13 @@ export class EngineServicesClient {
     return await this.#requestApi<ComponentItem>(
       'PUT',
       `${ITEM_PATH}/${componentId}/recover`,
+    );
+  }
+
+  async executeComponent(componentId: string) {
+    return await this.#requestApi<ComponentItem>(
+      'POST',
+      `${PROCESS_PATH}/${componentId}/execute`,
     );
   }
 }

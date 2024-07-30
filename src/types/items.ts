@@ -34,11 +34,14 @@ export type AppProps = {
 
 export type AppItem = Item & { itemType: 'APP'; extraProps: AppProps };
 
+export type ComponentType = 'FRONTEND' | 'CLOUD';
+
 export type ComponentProps = {
   isPublic?: boolean;
   isOpenSource?: AppSource;
   price?: number;
   componentId: string;
+  type: ComponentType;
 };
 
 export type ComponentItem = Item & {

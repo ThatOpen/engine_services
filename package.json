@@ -1,7 +1,7 @@
 {
   "name": "thatopen-services",
   "private": false,
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "dist/index.js",
   "type": "module",
   "files": [
@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "gaxios": "^6.7.0"
   }
 }
