@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.1.9
+
+### Patch Changes
+
+- Change return type of downloads to ReadableStream
+
 ## 0.1.8
 
 ### Patch Changes

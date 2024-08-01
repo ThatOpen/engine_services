@@ -1,5 +1,4 @@
 import axios, { Method } from 'axios';
-import { Readable } from 'stream';
 import { UpdateItemDto, UpdateItemFolderDto } from '../types/item.dto';
 import {
   ComponentItem,
@@ -81,7 +80,7 @@ export class EngineServicesClient {
       ...query,
       accessToken: this.accessToken,
     };
-    const response = await axios.request<Readable>({
+    const response = await axios.request<ReadableStream>({
       url,
       params,
       responseType: 'stream',

@@ -25,4 +25,4 @@ dist-ssr
 
 
 # Local testing files
-*.local.*
+*.local.dev.*
