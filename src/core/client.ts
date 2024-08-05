@@ -63,8 +63,10 @@ export class EngineServicesClient {
     const { body, query } = requestData || {};
     const url = this.#buildUrl(path);
 
+    const cleanQuery = this.#cleanData(query);
+
     const params = {
-      ...query,
+      ...cleanQuery,
       accessToken: this.accessToken,
     };
 
@@ -340,6 +342,21 @@ export class EngineServicesClient {
     return await this.#requestApi<ComponentItem>(
       'POST',
       `${PROCESS_PATH}/${componentId}/execute`,
+    );
+  }
+
+  #cleanData(data?: object) {
+    return (
+      data &&
+      Object.entries(data)
+        .filter(([_, value]) => value !== undefined)
+        .reduce(
+          (obj, [key, value]) => {
+            obj[key as string] = value;
+            return obj;
+          },
+          {} as { [key: string]: any },
+        )
     );
   }
 }

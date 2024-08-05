@@ -1,5 +1,17 @@
 # thatopen-services
 
+## 0.2.5
+
+### Patch Changes
+
+- Cleanup query object in main function
+
+## 0.2.4
+
+### Patch Changes
+
+- Fix optional fields in list functions
+
 ## 0.2.3
 
 ### Patch Changes
