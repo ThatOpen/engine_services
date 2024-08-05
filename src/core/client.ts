@@ -74,6 +74,9 @@ export class EngineServicesClient {
       url + '?' + new URLSearchParams(params).toString(),
       {
         method,
+        headers: {
+          Accept: 'application/json',
+        },
         ...(body && { body }),
       },
     );

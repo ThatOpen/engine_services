@@ -1,5 +1,17 @@
 # thatopen-services
 
+## 0.2.7
+
+### Patch Changes
+
+- Fix accept method in result
+
+## 0.2.6
+
+### Patch Changes
+
+- Fix fetch content type
+
 ## 0.2.5
 
 ### Patch Changes
