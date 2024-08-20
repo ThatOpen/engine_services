@@ -246,6 +246,7 @@ export class EngineServicesClient {
       const formData = new FormData();
       formData.append('file', file);
       versionTag && formData.append('versionTag', versionTag);
+      extraProps && formData.append('extraProps', JSON.stringify(extraProps));
       version = await this.#requestApi<ItemVersion>(
         'POST',
         `${ITEM_PATH}/${itemId}/version`,
@@ -254,11 +255,10 @@ export class EngineServicesClient {
         },
       );
     }
-    if (name || parentFolderId || extraProps) {
+    if (name || parentFolderId) {
       const body: UpdateItemDto = {
         ...(name && { name }),
         ...(parentFolderId && { folderId: parentFolderId }),
-        ...(extraProps && { extraProps }),
       };
 
       const parsedBody = JSON.stringify(body);

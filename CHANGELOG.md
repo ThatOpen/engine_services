@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.2.9
+
+### Patch Changes
+
+- Move extraProps to version data
+
 ## 0.2.8
 
 ### Patch Changes
