@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.4.2
+
+### Patch Changes
+
+- Improve returning types
+
 ## 0.4.1
 
 ### Patch Changes

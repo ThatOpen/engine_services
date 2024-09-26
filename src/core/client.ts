@@ -213,6 +213,24 @@ export class EngineServicesClient {
     });
   }
 
+  async downloadComponentBundle<T = ReadableStream>(
+    componentId: string,
+    responseType?: ResponseType,
+  ) {
+    return await this.#requestFile<T>(`${ITEM_PATH}/${componentId}/download`, {
+      responseType,
+    });
+  }
+
+  async downloadAppBundle<T = ReadableStream>(
+    appId: string,
+    responseType?: ResponseType,
+  ) {
+    return await this.#requestFile<T>(`${ITEM_PATH}/${appId}/download`, {
+      responseType,
+    });
+  }
+
   async downloadFolder<T = ReadableStream>(
     folderId: string,
     responseType?: ResponseType,
@@ -365,7 +383,7 @@ export class EngineServicesClient {
     executionParams: object,
     versionTag?: string,
   ) {
-    return await this.#requestApi<ComponentItem>(
+    return await this.#requestApi<{ executionId: string }>(
       'POST',
       `${PROCESS_PATH}/${componentId}/execute`,
       {
