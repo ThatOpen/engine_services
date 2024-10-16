@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.4.9
+
+### Patch Changes
+
+- Add abortExecution
+
 ## 0.4.8
 
 ### Patch Changes

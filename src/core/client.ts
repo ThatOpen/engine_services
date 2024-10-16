@@ -454,6 +454,13 @@ export class EngineServicesClient {
     );
   }
 
+  async abortExecution(executionId: string) {
+    return await this.#requestApi<ExecutionEntity>(
+      'POST',
+      `${PROCESS_PATH}/progress/${executionId}/abort`,
+    );
+  }
+
   /** @function
    * @name myFunction
    * @param {string} executionId - Identifier of the execution.
