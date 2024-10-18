@@ -470,12 +470,8 @@ export class EngineServicesClient {
     executionId: string,
     onUpdateCallback: (data: ExecutionSuscriptionReturnType) => void,
   ) {
-    const socket = await io(
-      'ws://localhost:3000?accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhIjoiNjVlMWZjNzkyNTZlYWE3YTFmNDA1OThmIiwidSI6IjY1ZTFmYTNjMjU2ZWFhN2ExZjQwNTk4YiJ9.r0cZ3blYLogbxriq_FC1Y6TTRz9S92DZYzxBCdPB_P8',
-      {
-        transports: ['websocket'],
-      },
-    );
+    const socket = await io(this.wsUrl);
+
     socket.on('connect', function () {
       socket.emit('executionSubscription', JSON.stringify({ executionId }));
       socket.on('execution', (data: ExecutionSuscriptionReturnType) => {

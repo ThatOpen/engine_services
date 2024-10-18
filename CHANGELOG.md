@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.5.1
+
+### Patch Changes
+
+- Fix execution callback
+
 ## 0.5.0
 
 ### Minor Changes
