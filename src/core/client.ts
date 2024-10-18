@@ -130,7 +130,10 @@ export class EngineServicesClient {
         );
       }
 
-      return response.json().then((data) => data as T);
+      return response
+        .json()
+        .then((data) => data as T)
+        .catch(() => undefined as T);
     } catch (e) {
       let retriesAmmount = this.retries;
       if (retriesAmmount) {
