@@ -96,9 +96,10 @@ export class EngineServicesClient {
         | 'application/json'
         | 'multipart/form-data'
         | 'application/x-www-form-urlencoded';
+      retries?: number;
     },
   ): Promise<T> {
-    const { body, query, contentType } = requestData || {};
+    const { body, query, contentType, retries } = requestData || {};
     const url = this.#buildUrl(path);
 
     const cleanQuery = this.#cleanData(query);
@@ -135,11 +136,12 @@ export class EngineServicesClient {
         .then((data) => data as T)
         .catch(() => undefined as T);
     } catch (e) {
-      let retriesAmmount = this.retries;
+      let retriesAmmount = retries != null ? retries : this.retries;
       if (retriesAmmount) {
         retriesAmmount = retriesAmmount - 1;
         return await this.#requestApi(method, path, {
           ...requestData,
+          retries,
         });
       } else {
         throw e;
