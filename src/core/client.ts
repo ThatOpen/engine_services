@@ -20,6 +20,7 @@ const ITEM_PATH = 'item';
 const PROCESS_PATH = 'processor';
 const ITEM_TYPE_FILE = 'FILE';
 const ITEM_TYPE_COMPONENT = 'TOOL';
+const HIDDEN_PATH = 'hidden';
 
 export type CreateItemProps = {
   file: File;
@@ -510,6 +511,49 @@ export class EngineServicesClient {
     socket.on('connect_error', function (e: any) {
       console.log(e);
     });
+  }
+
+  async createHiddenItem(file: File, parentItemId: string) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('parentItemId', parentItemId);
+    return await this.#requestApi<Item>('POST', `${ITEM_PATH}/${HIDDEN_PATH}`, {
+      body: formData,
+    });
+  }
+
+  async deleteHiddenItem(hiddenId: string) {
+    return await this.#requestApi<Item>(
+      'DELETE',
+      `${ITEM_PATH}/${HIDDEN_PATH}/${hiddenId}`,
+    );
+  }
+
+  async getHiddenItem(hiddenId: string) {
+    return await this.#requestApi<Item>(
+      'GET',
+      `${ITEM_PATH}/${HIDDEN_PATH}/${hiddenId}`,
+    );
+  }
+
+  async downloadHiddenItem(hiddenId: string) {
+    return await this.#requestFile(
+      `${ITEM_PATH}/${HIDDEN_PATH}/${hiddenId}/download`,
+    );
+  }
+
+  async getHiddenItemByParent(parentItemId: string) {
+    return await this.#requestApi<Item[]>(
+      'GET',
+      `${ITEM_PATH}/${parentItemId}/${HIDDEN_PATH}`,
+    );
+  }
+
+  async deleteHiddenItemByParent(parentItemId: string) {
+    return await this.#requestApi<Item[]>(
+      'DELETE',
+      `${ITEM_PATH}/${parentItemId}/${HIDDEN_PATH}`,
+    );
   }
 
   async #getItem<T = Item>(itemId: string, props?: GetItemProps) {
