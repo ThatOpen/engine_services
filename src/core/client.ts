@@ -58,6 +58,8 @@ export type EngineServicesClientProps = {
   retries?: number;
 };
 
+export type GetItemsParams = { folderId?: string; ShowVersions?: boolean };
+
 export class EngineServicesClient {
   private apiUrl: string;
   private accessToken: string;
@@ -387,16 +389,25 @@ export class EngineServicesClient {
     return await this.#requestApi<Item>('DELETE', `${ITEM_PATH}/${fileId}`);
   }
 
-  async listComponents(folderId?: string) {
+  async listComponents(params: GetItemsParams) {
+    const { folderId, ShowVersions } = params;
     if (folderId) {
       return await this.#requestApi<ComponentItem[]>(
         'GET',
         `${ITEM_PATH}/${folderId}/items`,
-        { query: { itemType: ITEM_TYPE_COMPONENT } },
+        {
+          query: {
+            itemType: ITEM_TYPE_COMPONENT,
+            ...(ShowVersions && { ShowVersions }),
+          },
+        },
       );
     }
     return await this.#requestApi<ComponentItem[]>('GET', `${ITEM_PATH}`, {
-      query: { itemType: ITEM_TYPE_COMPONENT },
+      query: {
+        itemType: ITEM_TYPE_COMPONENT,
+        ...(ShowVersions && { ShowVersions }),
+      },
     });
   }
 
