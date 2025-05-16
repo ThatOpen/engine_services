@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.5.7
+
+### Patch Changes
+
+- Allow for parentId when creating folders
+
 ## 0.5.6
 
 ### Patch Changes

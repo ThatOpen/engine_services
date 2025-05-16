@@ -183,9 +183,9 @@ export class EngineServicesClient {
   }
 
   // TODO allow nested folders
-  async createFolder(name: string) {
+  async createFolder(name: string, parentId?: string) {
     return await this.#requestApi<ItemFolder>('POST', FOLDER_PATH, {
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, ...(parentId && { parentId }) }),
       contentType: 'application/json',
     });
   }
@@ -520,7 +520,7 @@ export class EngineServicesClient {
       });
     });
 
-    socket.on('connect_error', function (e: any) {
+    socket.on('connect_error', function (e: unknown) {
       console.log(e);
     });
   }
@@ -594,13 +594,13 @@ export class EngineServicesClient {
     return (
       data &&
       Object.entries(data)
-        .filter(([_, value]) => value !== undefined)
+        .filter(([, value]) => value !== undefined)
         .reduce(
           (obj, [key, value]) => {
             obj[key as string] = value;
             return obj;
           },
-          {} as { [key: string]: any },
+          {} as { [key: string]: unknown },
         )
     );
   }
