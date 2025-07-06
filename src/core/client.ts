@@ -28,6 +28,7 @@ export type CreateItemProps = {
   name: string;
   versionTag: string;
   parentFolderId?: string;
+  metadata?: Record<string, string>;
 };
 
 export type UpdateItemProps = {
@@ -35,6 +36,7 @@ export type UpdateItemProps = {
   parentFolderId?: string;
   file?: File;
   versionTag?: string;
+  metadata?: Record<string, string>;
 };
 
 export type GetItemProps = {
@@ -293,6 +295,20 @@ export class EngineServicesClient {
     );
   }
 
+  async getFileMetadata(itemId: string, params?: DownloadItemFileParams) {
+    const { versionTag, withDraft } = params || {};
+    return await this.#requestApi<Record<string, string>>(
+      'GET',
+      `${ITEM_PATH}/${itemId}/metadata`,
+      {
+        query: {
+          ...(versionTag && { versionTag }),
+          ...(withDraft && { withDraft }),
+        },
+      },
+    );
+  }
+
   async downloadApp(
     appId: string,
 
@@ -321,7 +337,7 @@ export class EngineServicesClient {
     itemType: ItemType,
     extraProps?: P,
   ) {
-    const { name, versionTag, parentFolderId, file } = fileData;
+    const { name, versionTag, parentFolderId, file, metadata } = fileData;
     const formData = new FormData();
     formData.append('file', file);
     formData.append('name', name);
@@ -330,6 +346,8 @@ export class EngineServicesClient {
     parentFolderId && formData.append('folderId', parentFolderId);
 
     extraProps && formData.append('extraProps', JSON.stringify(extraProps));
+    metadata &&
+      formData.append('metadata', JSON.stringify(this.#cleanData(metadata)));
     return await this.#requestApi<CreateItemResponse<T>>('POST', ITEM_PATH, {
       body: formData,
     });
@@ -340,7 +358,7 @@ export class EngineServicesClient {
     fileData: UpdateItemProps,
     extraProps?: P,
   ): Promise<UpdateItemResponse<T>> {
-    const { name, versionTag, parentFolderId, file } = fileData;
+    const { name, versionTag, parentFolderId, file, metadata } = fileData;
 
     let item: T | undefined;
     let version: ItemVersion | undefined;
@@ -349,6 +367,8 @@ export class EngineServicesClient {
       formData.append('file', file);
       versionTag && formData.append('versionTag', versionTag);
       extraProps && formData.append('extraProps', JSON.stringify(extraProps));
+      metadata &&
+        formData.append('metadata', JSON.stringify(this.#cleanData(metadata)));
       version = await this.#requestApi<ItemVersion>(
         'POST',
         `${ITEM_PATH}/${itemId}/version`,
