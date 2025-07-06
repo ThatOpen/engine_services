@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.6.0
+
+### Minor Changes
+
+- Adding parameters related to metadata in items
+
 ## 0.5.7
 
 ### Patch Changes

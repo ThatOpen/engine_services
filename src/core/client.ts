@@ -295,7 +295,7 @@ export class EngineServicesClient {
     );
   }
 
-  async getFileMetadata(itemId: string, params?: DownloadItemFileParams) {
+  async getItemMetadata(itemId: string, params?: DownloadItemFileParams) {
     const { versionTag, withDraft } = params || {};
     return await this.#requestApi<Record<string, string>>(
       'GET',
