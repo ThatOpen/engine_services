@@ -11,6 +11,7 @@ import {
   Item,
   ItemFolder,
   ItemType,
+  ItemVersion,
   ItemWithVersions,
 } from '../types/items';
 import { CreateItemResponse } from '../types/response';
@@ -192,13 +193,7 @@ export class EngineServicesClient {
   }
 
   async downloadFile(fileId: string, params?: DownloadItemFileParams) {
-    const { versionTag, withDraft } = params || {};
-    return await this.#requestFile(`${ITEM_PATH}/${fileId}/download`, {
-      query: {
-        ...(versionTag && { versionTag }),
-        ...(withDraft && { withDraft }),
-      },
-    });
+    return await this.#downloadItem(fileId, params);
   }
 
   async getFileMetadata(itemId: string, params?: DownloadItemFileParams) {
@@ -285,6 +280,10 @@ export class EngineServicesClient {
     );
   }
 
+  async downloadComponent(componentId: string, params?: DownloadItemFileParams) {
+    return await this.#downloadItem(componentId, params);
+  }
+
   async archiveComponent(componentId: string) {
     return await this.#requestApi<ComponentItem>(
       'DELETE',
@@ -323,6 +322,10 @@ export class EngineServicesClient {
       ITEM_TYPE_APP,
       appProps,
     );
+  }
+
+  async downloadApp(appId: string, params?: DownloadItemFileParams) {
+    return await this.#downloadItem(appId, params);
   }
 
   async archiveApp(appId: string) {
@@ -386,6 +389,35 @@ export class EngineServicesClient {
     });
   }
 
+  // ─── General Item Operations ───
+
+  async updateItem(
+    itemId: string,
+    params: { name?: string; folderId?: string },
+  ) {
+    return await this.#requestApi<Item>('PUT', `${ITEM_PATH}/${itemId}`, {
+      body: JSON.stringify(params),
+      contentType: 'application/json',
+    });
+  }
+
+  async createVersion(
+    itemId: string,
+    file: File,
+    versionTag: string,
+    extraProps?: object,
+  ) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('versionTag', versionTag);
+    extraProps && formData.append('extraProps', JSON.stringify(extraProps));
+    return await this.#requestApi<ItemVersion>(
+      'POST',
+      `${ITEM_PATH}/${itemId}/version`,
+      { body: formData },
+    );
+  }
+
   // ─── Projects ───
 
   async getProjectData(projectId: string) {
@@ -395,7 +427,32 @@ export class EngineServicesClient {
     );
   }
 
+  // ─── Permissions ───
+
+  async checkPermission(params: {
+    resourceId: string;
+    resourceType: string;
+    action: string;
+    projectId: string;
+  }) {
+    return await this.#requestApi<{ hasPermission: boolean }>(
+      'GET',
+      `${PROJECT_PATH}/permissions/check`,
+      { query: params },
+    );
+  }
+
   // ─── Private Helpers ───
+
+  async #downloadItem(itemId: string, params?: DownloadItemFileParams) {
+    const { versionTag, withDraft } = params || {};
+    return await this.#requestFile(`${ITEM_PATH}/${itemId}/download`, {
+      query: {
+        ...(versionTag && { versionTag }),
+        ...(withDraft && { withDraft }),
+      },
+    });
+  }
 
   async #createItem<T = Item, P extends object = object>(
     fileData: CreateItemProps,

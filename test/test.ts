@@ -234,6 +234,14 @@ const testGroups: TestGroup[] = [
           }),
       },
       {
+        label: 'downloadComponent(id)',
+        inputs: [{ id: 'dlCompId', placeholder: 'Component ID' }],
+        fn: async () => {
+          const resp = await ensureClient().downloadComponent(getInput('dlCompId'));
+          return `Status: ${resp.status}, Content-Type: ${resp.headers.get('content-type')}, Size: ${resp.headers.get('content-length') || 'unknown'} bytes`;
+        },
+      },
+      {
         label: 'archiveComponent(id)',
         inputs: [{ id: 'archCompId', placeholder: 'Component ID' }],
         fn: () => ensureClient().archiveComponent(getInput('archCompId')),
@@ -264,6 +272,14 @@ const testGroups: TestGroup[] = [
             name: getInput('crAppName') || file.name,
             versionTag: getInput('crAppVersion') || '1.0.0',
           });
+        },
+      },
+      {
+        label: 'downloadApp(appId)',
+        inputs: [{ id: 'dlAppId', placeholder: 'App ID' }],
+        fn: async () => {
+          const resp = await ensureClient().downloadApp(getInput('dlAppId'));
+          return `Status: ${resp.status}, Content-Type: ${resp.headers.get('content-type')}, Size: ${resp.headers.get('content-length') || 'unknown'} bytes`;
         },
       },
       {
@@ -311,6 +327,47 @@ const testGroups: TestGroup[] = [
     ],
   },
 
+  // ─── General Item Operations ───
+  {
+    title: 'Item Operations',
+    tests: [
+      {
+        label: 'updateItem(itemId, { name, folderId })',
+        inputs: [
+          { id: 'updItemId', placeholder: 'Item ID' },
+          { id: 'updItemName', placeholder: 'New name (optional)' },
+          { id: 'updItemFolder', placeholder: 'New folder ID (optional)' },
+        ],
+        fn: () => {
+          const name = getInput('updItemName') || undefined;
+          const folderId = getInput('updItemFolder') || undefined;
+          return ensureClient().updateItem(getInput('updItemId'), { name, folderId });
+        },
+      },
+      {
+        label: 'createVersion(itemId, file, versionTag, extraProps)',
+        inputs: [
+          { id: 'crVerItemId', placeholder: 'Item ID' },
+          { id: 'crVerFile', placeholder: 'File', type: 'file' },
+          { id: 'crVerTag', placeholder: 'Version tag (e.g. 2.0.0)' },
+          { id: 'crVerProps', placeholder: 'Extra props JSON (required for apps/components)' },
+        ],
+        fn: () => {
+          const file = getFile('crVerFile');
+          if (!file) throw new Error('Please select a file');
+          const propsStr = getInput('crVerProps');
+          const extraProps = propsStr ? JSON.parse(propsStr) : undefined;
+          return ensureClient().createVersion(
+            getInput('crVerItemId'),
+            file,
+            getInput('crVerTag') || '1.0.0',
+            extraProps,
+          );
+        },
+      },
+    ],
+  },
+
   // ─── Projects ───
   {
     title: 'Projects',
@@ -319,6 +376,29 @@ const testGroups: TestGroup[] = [
         label: 'getProjectData(projectId)',
         inputs: [{ id: 'getProjId', placeholder: 'Project ID' }],
         fn: () => ensureClient().getProjectData(getInput('getProjId')),
+      },
+    ],
+  },
+
+  // ─── Permissions ───
+  {
+    title: 'Permissions',
+    tests: [
+      {
+        label: 'checkPermission(resourceId, resourceType, action, projectId)',
+        inputs: [
+          { id: 'permResId', placeholder: 'Resource ID' },
+          { id: 'permResType', placeholder: 'Resource type (e.g. STORAGE)' },
+          { id: 'permAction', placeholder: 'Action (e.g. READ)' },
+          { id: 'permProjId', placeholder: 'Project ID' },
+        ],
+        fn: () =>
+          ensureClient().checkPermission({
+            resourceId: getInput('permResId'),
+            resourceType: getInput('permResType'),
+            action: getInput('permAction'),
+            projectId: getInput('permProjId'),
+          }),
       },
     ],
   },
