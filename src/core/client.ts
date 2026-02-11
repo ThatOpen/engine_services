@@ -148,6 +148,21 @@ export class EngineServicesClient {
     }
   }
 
+  async #requestFile(path: string, requestData?: { query?: object }) {
+    const { query } = requestData || {};
+    const url = this.#buildUrl(path);
+    const params = {
+      ...query,
+      accessToken: this.accessToken,
+    };
+    const response = await fetch(
+      url + '?' + new URLSearchParams(params).toString(),
+      { method: 'GET' },
+    );
+
+    return response;
+  }
+
   // ─── Files ───
 
   async listFiles(filters?: { folderId?: string; archived?: boolean }) {
@@ -174,6 +189,16 @@ export class EngineServicesClient {
 
   async archiveFile(fileId: string) {
     return await this.#requestApi<Item>('DELETE', `${ITEM_PATH}/${fileId}`);
+  }
+
+  async downloadFile(fileId: string, params?: DownloadItemFileParams) {
+    const { versionTag, withDraft } = params || {};
+    return await this.#requestFile(`${ITEM_PATH}/${fileId}/download`, {
+      query: {
+        ...(versionTag && { versionTag }),
+        ...(withDraft && { withDraft }),
+      },
+    });
   }
 
   async getFileMetadata(itemId: string, params?: DownloadItemFileParams) {
@@ -305,6 +330,29 @@ export class EngineServicesClient {
   }
 
   // ─── Execution ───
+
+  async executeComponent(
+    componentId: string,
+    executionParams: object,
+    versionTag?: string,
+  ) {
+    return await this.#requestApi<{ executionId: string }>(
+      'POST',
+      `${PROCESS_PATH}/${componentId}/execute`,
+      {
+        body: JSON.stringify(executionParams),
+        query: { ...(versionTag && { versionTag }) },
+        contentType: 'application/json',
+      },
+    );
+  }
+
+  async abortExecution(executionId: string) {
+    return await this.#requestApi<ExecutionEntity>(
+      'POST',
+      `${PROCESS_PATH}/progress/${executionId}/abort`,
+    );
+  }
 
   async listExecutions(componentId: string) {
     return await this.#requestApi<ExecutionEntity[]>(

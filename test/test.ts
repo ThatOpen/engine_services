@@ -155,6 +155,14 @@ const testGroups: TestGroup[] = [
         fn: () => ensureClient().getFileMetadata(getInput('getFileMetaId')),
       },
       {
+        label: 'downloadFile(fileId)',
+        inputs: [{ id: 'dlFileId', placeholder: 'File ID' }],
+        fn: async () => {
+          const resp = await ensureClient().downloadFile(getInput('dlFileId'));
+          return `Status: ${resp.status}, Content-Type: ${resp.headers.get('content-type')}, Size: ${resp.headers.get('content-length') || 'unknown'} bytes`;
+        },
+      },
+      {
         label: 'archiveFile(fileId)',
         inputs: [{ id: 'archFileId', placeholder: 'File ID' }],
         fn: () => ensureClient().archiveFile(getInput('archFileId')),
@@ -271,6 +279,20 @@ const testGroups: TestGroup[] = [
     title: 'Execution',
     tests: [
       {
+        label: 'executeComponent(componentId, params)',
+        inputs: [
+          { id: 'execCompId', placeholder: 'Component ID' },
+          { id: 'execParams', placeholder: 'Params JSON (e.g. {})' },
+        ],
+        fn: () => {
+          const params = getInput('execParams') || '{}';
+          return ensureClient().executeComponent(
+            getInput('execCompId'),
+            JSON.parse(params),
+          );
+        },
+      },
+      {
         label: 'listExecutions(componentId)',
         inputs: [{ id: 'listExecCompId', placeholder: 'Component ID' }],
         fn: () =>
@@ -280,6 +302,11 @@ const testGroups: TestGroup[] = [
         label: 'getExecution(executionId)',
         inputs: [{ id: 'getExecId', placeholder: 'Execution ID' }],
         fn: () => ensureClient().getExecution(getInput('getExecId')),
+      },
+      {
+        label: 'abortExecution(executionId)',
+        inputs: [{ id: 'abortExecId', placeholder: 'Execution ID' }],
+        fn: () => ensureClient().abortExecution(getInput('abortExecId')),
       },
     ],
   },
