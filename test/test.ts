@@ -167,6 +167,11 @@ const testGroups: TestGroup[] = [
         inputs: [{ id: 'archFileId', placeholder: 'File ID' }],
         fn: () => ensureClient().archiveFile(getInput('archFileId')),
       },
+      {
+        label: 'recoverFile(fileId)',
+        inputs: [{ id: 'recFileId', placeholder: 'File ID' }],
+        fn: () => ensureClient().recoverFile(getInput('recFileId')),
+      },
     ],
   },
 
@@ -192,9 +197,33 @@ const testGroups: TestGroup[] = [
         fn: () => ensureClient().getFolder(getInput('getFolderId')),
       },
       {
+        label: 'updateFolder(folderId, { name })',
+        inputs: [
+          { id: 'updFolderId', placeholder: 'Folder ID' },
+          { id: 'updFolderName', placeholder: 'New name' },
+        ],
+        fn: () =>
+          ensureClient().updateFolder(getInput('updFolderId'), {
+            name: getInput('updFolderName'),
+          }),
+      },
+      {
         label: 'archiveFolder(folderId)',
         inputs: [{ id: 'archFolderId', placeholder: 'Folder ID' }],
         fn: () => ensureClient().archiveFolder(getInput('archFolderId')),
+      },
+      {
+        label: 'recoverFolder(folderId)',
+        inputs: [{ id: 'recFolderId', placeholder: 'Folder ID' }],
+        fn: () => ensureClient().recoverFolder(getInput('recFolderId')),
+      },
+      {
+        label: 'downloadFolder(folderId)',
+        inputs: [{ id: 'dlFolderId', placeholder: 'Folder ID' }],
+        fn: async () => {
+          const resp = await ensureClient().downloadFolder(getInput('dlFolderId'));
+          return `Status: ${resp.status}, Content-Type: ${resp.headers.get('content-type')}, Size: ${resp.headers.get('content-length') || 'unknown'} bytes`;
+        },
       },
     ],
   },
@@ -221,7 +250,10 @@ const testGroups: TestGroup[] = [
             file,
             name: getInput('crCompName') || file.name,
             versionTag: getInput('crCompVersion') || '1.0.0',
-            componentProps: { executionEnvironment: 'CLOUD' },
+            componentProps: {
+              type: 'CLOUD',
+              tier: 'FREE',
+            },
           });
         },
       },
@@ -242,9 +274,23 @@ const testGroups: TestGroup[] = [
         },
       },
       {
+        label: 'downloadComponentBundle(id)',
+        inputs: [{ id: 'dlCompBundleId', placeholder: 'Component ID' }],
+        fn: async () => {
+          const resp = await ensureClient().downloadComponentBundle(getInput('dlCompBundleId'));
+          const text = await resp.text();
+          return `Status: ${resp.status}, Bundle length: ${text.length} chars\nFirst 200 chars: ${text.substring(0, 200)}...`;
+        },
+      },
+      {
         label: 'archiveComponent(id)',
         inputs: [{ id: 'archCompId', placeholder: 'Component ID' }],
         fn: () => ensureClient().archiveComponent(getInput('archCompId')),
+      },
+      {
+        label: 'recoverComponent(id)',
+        inputs: [{ id: 'recCompId', placeholder: 'Component ID' }],
+        fn: () => ensureClient().recoverComponent(getInput('recCompId')),
       },
     ],
   },
@@ -280,6 +326,15 @@ const testGroups: TestGroup[] = [
         fn: async () => {
           const resp = await ensureClient().downloadApp(getInput('dlAppId'));
           return `Status: ${resp.status}, Content-Type: ${resp.headers.get('content-type')}, Size: ${resp.headers.get('content-length') || 'unknown'} bytes`;
+        },
+      },
+      {
+        label: 'downloadAppBundle(appId)',
+        inputs: [{ id: 'dlAppBundleId', placeholder: 'App ID' }],
+        fn: async () => {
+          const resp = await ensureClient().downloadAppBundle(getInput('dlAppBundleId'));
+          const text = await resp.text();
+          return `Status: ${resp.status}, Bundle length: ${text.length} chars\nFirst 200 chars: ${text.substring(0, 200)}...`;
         },
       },
       {
@@ -323,6 +378,53 @@ const testGroups: TestGroup[] = [
         label: 'abortExecution(executionId)',
         inputs: [{ id: 'abortExecId', placeholder: 'Execution ID' }],
         fn: () => ensureClient().abortExecution(getInput('abortExecId')),
+      },
+    ],
+  },
+
+  // ─── Hidden Files ───
+  {
+    title: 'Hidden Files',
+    tests: [
+      {
+        label: 'createHiddenFile(file, parentItemId)',
+        inputs: [
+          { id: 'crHiddenFile', placeholder: 'File', type: 'file' },
+          { id: 'crHiddenParent', placeholder: 'Parent Item ID' },
+        ],
+        fn: () => {
+          const file = getFile('crHiddenFile');
+          if (!file) throw new Error('Please select a file');
+          return ensureClient().createHiddenFile(file, getInput('crHiddenParent'));
+        },
+      },
+      {
+        label: 'getHiddenFile(hiddenId)',
+        inputs: [{ id: 'getHiddenId', placeholder: 'Hidden File ID' }],
+        fn: () => ensureClient().getHiddenFile(getInput('getHiddenId')),
+      },
+      {
+        label: 'downloadHiddenFile(hiddenId)',
+        inputs: [{ id: 'dlHiddenId', placeholder: 'Hidden File ID' }],
+        fn: async () => {
+          const resp = await ensureClient().downloadHiddenFile(getInput('dlHiddenId'));
+          return `Status: ${resp.status}, Content-Type: ${resp.headers.get('content-type')}, Size: ${resp.headers.get('content-length') || 'unknown'} bytes`;
+        },
+      },
+      {
+        label: 'getHiddenFilesByParent(parentItemId)',
+        inputs: [{ id: 'getHiddenByParent', placeholder: 'Parent Item ID' }],
+        fn: () => ensureClient().getHiddenFilesByParent(getInput('getHiddenByParent')),
+      },
+      {
+        label: 'deleteHiddenFile(hiddenId)',
+        inputs: [{ id: 'delHiddenId', placeholder: 'Hidden File ID' }],
+        fn: () => ensureClient().deleteHiddenFile(getInput('delHiddenId')),
+      },
+      {
+        label: 'deleteHiddenFilesByParent(parentItemId)',
+        inputs: [{ id: 'delHiddenByParent', placeholder: 'Parent Item ID' }],
+        fn: () => ensureClient().deleteHiddenFilesByParent(getInput('delHiddenByParent')),
       },
     ],
   },
