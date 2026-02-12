@@ -28,6 +28,12 @@ execSync('npm install', {
   stdio: 'inherit',
 });
 
+// Link local thatopen-services so the test app uses the local build
+execSync('npm link thatopen-services', {
+  cwd: appDir,
+  stdio: 'inherit',
+});
+
 console.log('');
 console.log('Test app ready! Run:');
 console.log('  cd temp/test-app');

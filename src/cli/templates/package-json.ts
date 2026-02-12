@@ -18,6 +18,7 @@ export function getPackageJson(appName: string, template?: string): string {
     (pkg.dependencies as Record<string, string>) = {
       '@thatopen/components': '^3.3.1',
       '@thatopen/ui': '^3.3.3',
+      'thatopen-services': '^0.6.1',
       three: '^0.182.0',
     };
   }
