@@ -16,8 +16,8 @@
     "build:cli": "vite build --config vite.config.cli.mts",
     "preview": "vite preview",
     "test:ui": "vite --config test/vite.config.mts",
-    "test:cli": "npm run build:cli && node test/setup-test-app.mjs",
-    "test:serve": "cd temp/test-app && thatopen dev --platform",
+    "test:cli-build": "npm run build:cli && node test/setup-test-app.mjs",
+    "test:cli-serve": "cd temp/test-app && thatopen dev --platform",
     "create-version": "yarn build && yarn changeset && yarn changeset version && yarn changeset publish"
   },
   "devDependencies": {
