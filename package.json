@@ -18,8 +18,10 @@
     "build:cli": "vite build --config vite.config.cli.mts",
     "preview": "vite preview",
     "test:ui": "vite --config test/vite.config.mts",
-    "test:cli-build": "npm run build:cli && node test/setup-test-app.mjs",
-    "test:cli-serve": "cd temp/test-app && thatopen dev --platform",
+    "test:cli-build-app": "npm run build:cli && node test/setup-test-app.mjs",
+    "test:cli-serve-app": "cd temp/test-app && thatopen dev --platform",
+    "test:cli-build-component": "npm run build:cli && node test/setup-test-component.mjs",
+    "test:cli-run-component": "cd temp/test-component && thatopen run --skip-build",
     "create-version": "yarn build && yarn changeset && yarn changeset version && yarn changeset publish"
   },
   "devDependencies": {
