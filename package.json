@@ -1,5 +1,6 @@
 {
   "name": "thatopen-services",
+  "description": "Client library and CLI for building BIM apps and cloud components on the That Open Platform",
   "private": false,
   "version": "0.6.1",
   "main": "dist/index.cjs.js",

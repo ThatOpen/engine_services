@@ -1,91 +1,172 @@
 # thatopen-services
 
-JavaScript/TypeScript client library and CLI for the ThatOpen platform.
+Client library and CLI for building BIM apps and cloud components on the [That Open Platform](https://platform.thatopen.com).
 
-## What's in this repo
+## Quick Start
 
-- **Library** (`src/core/`) — `EngineServicesClient` for interacting with the ThatOpen API (files, apps, components, projects, executions)
-- **CLI** (`src/cli/`) — `thatopen` command for scaffolding, developing, and publishing apps
-
-## Setup
+### Create a BIM app
 
 ```bash
+npx thatopen create my-app
+cd my-app
 npm install
-npm run build        # Builds both library and CLI
+npm run dev
+
+# Open your project on platform.thatopen.com and click the debug button
 ```
 
-## Library
+### Create a cloud component
+
+```bash
+npx thatopen create my-component --template cloud
+cd my-component
+npm install
+npm run run   # Build and test locally
+```
+
+### Templates
+
+| Template | Command | What you get |
+|----------|---------|--------------|
+| `bim` (default) | `npx thatopen create my-app` | Three.js + BIM viewer + platform UI components |
+| `default` | `npx thatopen create my-app --template default` | Minimal app showing platform context |
+| `cloud` | `npx thatopen create my-component --template cloud` | Server-side Node.js component |
+
+## What's in this package
+
+- **Library** — `EngineServicesClient` for interacting with the That Open API (files, folders, apps, cloud components, executions, permissions)
+- **CLI** — `thatopen` command for scaffolding, developing, and publishing
+- **Built-in component types** — TypeScript stubs for platform-hosted UI components (AppManager, ViewportManager, etc.)
+
+## Library usage
 
 ```typescript
 import { EngineServicesClient } from 'thatopen-services';
 
 const client = new EngineServicesClient(accessToken, apiUrl);
+
+// Files
 const files = await client.listFiles();
+await client.createFile({ file: blob, name: "model.ifc", versionTag: "v1" });
+const response = await client.downloadFile(fileId);
+
+// Folders
+const folders = await client.listFolders();
+await client.createFolder("My Folder");
+
+// Cloud component execution
+const { executionId } = await client.executeComponent(componentId, { param: "value" });
+client.onExecutionProgress(executionId, (data) => {
+  console.log(data.progressUpdate, data.messageUpdate);
+});
 ```
 
-The library builds as both CJS (`dist/index.cjs.js`) and ESM (`dist/index.es.js`).
+Inside platform apps, use the Auth0 JWT from the platform context:
 
-## CLI
+```typescript
+const ctx = window.__THATOPEN_CONTEXT__; // { appId, projectId, accessToken, apiUrl }
+const client = new EngineServicesClient(ctx.accessToken, ctx.apiUrl, { useBearer: true });
+```
 
-The CLI is available as `thatopen` after install. It has four commands:
+## CLI commands
 
 | Command | Description |
 |---------|-------------|
-| `thatopen create <app-name>` | Scaffold a new app project |
-| `thatopen dev` | Start local dev server |
-| `thatopen login` | Authenticate with the platform |
-| `thatopen publish` | Build and publish the app |
+| `thatopen create <name> [--template bim\|default\|cloud]` | Scaffold a new project |
+| `thatopen dev [--platform]` | Start local dev server |
+| `thatopen login [--token T] [--local]` | Authenticate with the platform |
+| `thatopen publish` | Build and publish to the platform |
+| `thatopen run [--params '{}']` | Build and test a cloud component locally |
 
-### App workflow
+## App workflow
+
+Apps run inside the That Open Platform (platform.thatopen.com) within a project. They are served inside the platform's iframe — not as standalone websites.
 
 ```bash
-# 1. Create a new app
-thatopen create my-app
-cd my-app
-npm install
+# 1. Create and install
+npx thatopen create my-app
+cd my-app && npm install
 
 # 2. Develop locally
 npm run dev
+# Open your project on the platform and click the debug button.
+# Live reload is enabled — save a file to rebuild.
 
-# 3. Authenticate (saves token to local .thatopen file)
-npm run login -- --token <your-token> --api-url http://localhost:3000
+# 3. Authenticate
+npm run login -- --token <your-token>
 
-# 4. First publish (creates the app, auto-saves app ID to .thatopen)
+# 4. Publish (first time creates the app, saves app ID)
 npm run publish
 
-# 5. Subsequent updates (reads app ID from .thatopen)
+# 5. Update (subsequent publishes)
 npm run update
 ```
 
-### Templates
-
-`thatopen create` supports `--template` to choose the starter:
-
-- `bim` (default) — Three.js + ThatOpen Components + BUI + EngineServicesClient
-- `default` — Minimal starter showing app context
-
-### Local dev inside the platform
-
-To test your app inside the platform's iframe:
+## Cloud component workflow
 
 ```bash
-thatopen dev --platform
+# 1. Create and install
+npx thatopen create my-component --template cloud
+cd my-component && npm install
+
+# 2. Run locally
+npm run run
+
+# 3. Pass parameters
+npx thatopen run --params '{"inputFile": "model.ifc"}'
+
+# 4. Authenticate and publish
+npm run login -- --token <your-token>
+npm run publish
 ```
 
-This builds in watch mode and serves the bundle over HTTPS at `https://localhost:5174/bundle.js`. In the platform's project view, use the "Local Dev" section to load it.
+Cloud components export an `async function main()` that runs on the server. The execution engine provides globals:
 
-The first time, you'll need to open `https://localhost:5174/bundle.js` in your browser and accept the self-signed certificate.
+| Global | Purpose |
+|--------|---------|
+| `thatOpenServices` | Authenticated `EngineServicesClient` |
+| `executionParams` | Parameters passed by the caller |
+| `executionReporter` | `{ message(msg), progress(pct) }` for live feedback |
+| `OBC` | `@thatopen/components` — BIM engine |
+| `THREE` | `three` — 3D math and geometry |
+| `fs` | Node.js filesystem |
 
-### Config files
+## Built-in components
+
+Platform-hosted UI components loaded at runtime:
+
+```typescript
+import { AppManager, ViewportManager } from "thatopen-services";
+
+await client.initBuiltInComponent(AppManager, components, { OBC, BUI });
+await client.initBuiltInComponent(ViewportManager, components, { OBC, BUI, THREE, FRAGS });
+
+const app = components.get(AppManager);
+const viewports = components.get(ViewportManager);
+const { element, world } = await viewports.create();
+```
+
+Available: `AppManager`, `ViewportManager`, `LoadModelButton`, `ViewerToolbar`, `ModelsPanel`, `ModelsDropdown`, `ClassificationsList`, `ClashesList`, `ClippingsList`, `LengthMeasuringsList`, `AreaMeasuringsList`, `ColorsPalette`, `HighlightersList`, `QtoComparisonList`, `QueriesHierarchy`, `CustomViewLegend`, `ScreenshotAnnotator`.
+
+## Config files
 
 | File | Scope | Contains |
 |------|-------|----------|
 | `~/.thatopen/config.json` | Global | `accessToken`, `apiUrl` |
-| `.thatopen` (project root) | Per-project, gitignored | `accessToken`, `apiUrl`, `appId` |
+| `.thatopen` (project root) | Per-project (gitignored) | `accessToken`, `apiUrl`, `appId` or `componentId` |
 
 The CLI checks the local `.thatopen` first, then falls back to the global config.
 
+---
+
 ## Development (working on this repo)
+
+### Setup
+
+```bash
+npm install
+npm run build        # Builds both library and CLI
+```
 
 ### Build commands
 
@@ -98,41 +179,26 @@ npm run build:cli      # CLI only
 ### Testing the CLI locally
 
 ```bash
-# 1. Link the CLI globally so `thatopen` points to this repo
+# Link the CLI globally so `thatopen` points to this repo
 npm link
 
-# 2. Build CLI and scaffold a test app in temp/test-app
-npm run test:cli-build
+# Build CLI and scaffold a test app
+npm run test:cli-build-app
 
-# 3. Test local dev inside the platform
-npm run test:cli-serve
+# Serve the test app in platform mode
+npm run test:cli-serve-app
+
+# Build and scaffold a test cloud component
+npm run test:cli-build-component
+
+# Run the test cloud component locally
+npm run test:cli-run-component
 ```
 
-`test:cli-build` does:
-1. Builds the CLI (`dist/cli.js`)
-2. Scaffolds `temp/test-app` with the BIM template
-3. Installs dependencies
-4. Links the local `thatopen-services` build so the test app uses the repo version
-
-### Testing publish
+### Publishing a new version
 
 ```bash
-cd temp/test-app
-
-# Login with a platform API token
-npm run login -- --token <token> --api-url http://localhost:3000
-
-# First publish (creates app, saves app ID to .thatopen)
-npm run publish
-
-# Update (publishes new version to same app)
-npm run update
+yarn create-version
 ```
 
-## How to publish a new version of the library?
-
-- Run `yarn create-version`
-- Follow instructions
-- Keep in mind the importance of versions (don't release a major for very few non breaking changes)
-- Make sure you've got the proper npm token!
-- Check that the latest version has been published
+This runs: build → changeset → version → publish to npm. Keep in mind the importance of semver (don't release a major for non-breaking changes). Make sure you have the proper npm token.

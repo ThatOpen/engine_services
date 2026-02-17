@@ -153,17 +153,13 @@ function startPlatformMode(cwd: string, bundlePort: string) {
     res.end('Not found');
   };
 
-  const bundleUrl = `http://localhost:${bundlePort}/bundle.js`;
   const server = createServer(handler);
 
   server.listen(parseInt(bundlePort), () => {
     console.log(`Bundle server running at http://localhost:${bundlePort}`);
     console.log('');
-    console.log('Use this devUrl in the platform:');
-    console.log(`  ${bundleUrl}`);
-    console.log('');
-    console.log('Live reload is enabled — save a file to rebuild and');
-    console.log('the app will automatically reload inside the platform.');
+    console.log('Open your project on the platform and click the debug button.');
+    console.log('Live reload is enabled — save a file to rebuild automatically.');
     console.log('');
   });
 

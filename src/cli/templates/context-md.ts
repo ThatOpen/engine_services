@@ -25,12 +25,21 @@ UI components, and the platform API.
 ## Commands
 
 \`\`\`bash
-npm run dev        # Start local dev server (standalone mode)
-npm run build      # Build dist/bundle.js
-npm run login      # Authenticate with the platform (saves token locally)
-npm run publish    # First publish — creates the app on the platform
-npm run update     # Publish a new version of an existing app
+npm run dev        # Serve bundle for local dev inside the platform
+npm run build               # Build dist/bundle.js
+npm run login               # Authenticate with the platform (saves token locally)
+npm run publish             # First publish — creates the app on the platform
+npm run update              # Publish a new version of an existing app
 \`\`\`
+
+### Local development
+
+Apps run inside the That Open Platform (platform.thatopen.com) within a project —
+not as standalone websites. To develop locally:
+
+1. Run \`npm run dev\` — this builds in watch mode and serves the bundle.
+2. Open your project on the platform and click the debug button.
+3. Live reload is enabled — save a file to rebuild automatically.
 
 ## Key libraries
 
@@ -190,12 +199,21 @@ It runs in the browser inside the platform's iframe.
 ## Commands
 
 \`\`\`bash
-npm run dev        # Start local dev server (standalone mode)
-npm run build      # Build dist/bundle.js
-npm run login      # Authenticate with the platform (saves token locally)
-npm run publish    # First publish — creates the app on the platform
-npm run update     # Publish a new version of an existing app
+npm run dev        # Serve bundle for local dev inside the platform
+npm run build               # Build dist/bundle.js
+npm run login               # Authenticate with the platform (saves token locally)
+npm run publish             # First publish — creates the app on the platform
+npm run update              # Publish a new version of an existing app
 \`\`\`
+
+### Local development
+
+Apps run inside the That Open Platform (platform.thatopen.com) within a project —
+not as standalone websites. To develop locally:
+
+1. Run \`npm run dev\` — this builds in watch mode and serves the bundle.
+2. Open your project on the platform and click the debug button.
+3. Live reload is enabled — save a file to rebuild automatically.
 
 ## Adding BIM capabilities
 

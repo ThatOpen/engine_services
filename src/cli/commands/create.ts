@@ -96,7 +96,7 @@ export const createCommand = new Command('create')
       console.log('    npm run publish                      # First publish');
       console.log('    npm run update                       # Publish new version');
     } else {
-      console.log('    npm run dev                          # Start local dev server');
+      console.log('    npm run dev                          # Serve app inside the platform');
       console.log('    npm run login -- --token <token>     # Authenticate');
       console.log('    npm run publish                      # First publish (saves app ID)');
       console.log('    npm run update                       # Publish new version');

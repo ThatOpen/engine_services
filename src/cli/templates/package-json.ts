@@ -42,9 +42,8 @@ export function getPackageJson(appName: string, template?: string): string {
     version: '1.0.0',
     private: true,
     scripts: {
-      dev: 'vite',
+      dev: 'thatopen dev --platform',
       build: 'vite build',
-      preview: 'vite preview',
       login: 'thatopen login --local',
       publish: 'thatopen publish',
       update: 'thatopen publish',
