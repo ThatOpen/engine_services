@@ -73,6 +73,30 @@ Always use \`npm run dev\` which runs \`thatopen serve\` under the hood.
 Built-in components are platform-hosted UI modules loaded at runtime via the API client.
 They are fetched, evaluated, and registered with the OBC component system.
 
+| Component | Purpose |
+|-----------|---------|
+| **AppManager** | App shell — CSS grid layout system with sidebar for switching layouts |
+| **ViewportManager** | Factory for 3D viewports with pre-configured world (scene, camera, renderer) |
+| **LoadModelButton** | Button + dropdown for loading IFC and Fragments files |
+| **ViewerToolbar** | Toolbar with Show/Hide/Focus/Isolate actions and color palette |
+| **ModelsPanel** | Panel listing loaded models with search bar and load button |
+| **ModelsDropdown** | Dropdown selector listing loaded models |
+| **ClassificationsList** | Hierarchical table of IFC classification data |
+| **ClashesList** | Interactive clash detection results with click-to-highlight |
+| **ClippingsList** | Panel listing clipping planes with enable/delete controls |
+| **LengthMeasuringsList** | Panel listing length measurements with cumulative total |
+| **AreaMeasuringsList** | Panel listing area measurements with area/perimeter totals |
+| **ColorsPalette** | Color picker grid with custom input and Highlighter styles |
+| **HighlightersList** | Panel listing Highlighter styles with manage/apply actions |
+| **QtoComparisonList** | Side-by-side quantity comparison for two selected elements |
+| **QueriesHierarchy** | Recursive multi-level query browser for IFC data |
+| **CustomViewLegend** | Color legend overlay with colored circles and labels |
+| **ScreenshotAnnotator** | Modal for annotating screenshots (arrows, text, freehand) via MarkerJS |
+
+**Full API reference**: Each component has detailed JSDoc with \`@example\` blocks in the
+\`thatopen-services\` package source (\`src/built-in/index.ts\`). Read that file for config
+interfaces, method signatures, and code examples.
+
 ### Loading pattern
 
 Register all globals once with \`setBuiltInGlobals\`, then load components without passing globals each time:

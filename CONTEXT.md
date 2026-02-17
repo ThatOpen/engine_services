@@ -93,7 +93,29 @@ const app = components.get(AppManager);
 const viewports = components.get(ViewportManager);
 ```
 
-Available built-in components: `AppManager`, `ViewportManager`, `AreaMeasuringsList`, `LengthMeasuringsList`, `ClashesList`, `ClassificationsList`, `ClippingsList`, `ColorsPalette`, `CustomViewLegend`, `HighlightersList`, `LoadModelButton`, `ModelsDropdown`, `ModelsPanel`, `QtoComparisonList`, `QueriesHierarchy`, `ScreenshotAnnotator`, `ViewerToolbar`.
+Available built-in components:
+
+| Component | Purpose |
+|-----------|---------|
+| `AppManager` | App shell — CSS grid layout with sidebar for switching layouts |
+| `ViewportManager` | Factory for 3D viewports with pre-configured world |
+| `LoadModelButton` | Button + dropdown for loading IFC / Fragments files |
+| `ViewerToolbar` | Toolbar with Show/Hide/Focus/Isolate and color palette |
+| `ModelsPanel` | Panel listing loaded models with search and load button |
+| `ModelsDropdown` | Dropdown selector listing loaded models |
+| `ClassificationsList` | Hierarchical table of IFC classification data |
+| `ClashesList` | Interactive clash detection results with highlighting |
+| `ClippingsList` | Panel listing clipping planes with controls |
+| `LengthMeasuringsList` | Panel listing length measurements with totals |
+| `AreaMeasuringsList` | Panel listing area measurements with totals |
+| `ColorsPalette` | Color picker with Highlighter style swatches |
+| `HighlightersList` | Panel listing Highlighter styles with manage actions |
+| `QtoComparisonList` | Side-by-side quantity comparison for two elements |
+| `QueriesHierarchy` | Recursive multi-level query browser |
+| `CustomViewLegend` | Color legend overlay |
+| `ScreenshotAnnotator` | Modal for annotating screenshots via MarkerJS |
+
+Full API reference with config interfaces, method signatures, and `@example` blocks: `src/built-in/index.ts`.
 
 ### Configuration files
 
