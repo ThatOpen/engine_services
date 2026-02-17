@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { writeConfig, writeLocalConfig } from '../lib/config';
+import { writeConfig, updateLocalConfig } from '../lib/config';
 import { EngineServicesClient } from '../../core/client';
 
 export const loginCommand = new Command('login')
@@ -48,7 +48,7 @@ export const loginCommand = new Command('login')
     }
 
     if (opts.local) {
-      writeLocalConfig({ accessToken: opts.token, apiUrl });
+      updateLocalConfig({ accessToken: opts.token, apiUrl });
       console.log('Logged in successfully. Config saved to .thatopen');
     } else {
       writeConfig({ accessToken: opts.token, apiUrl });

@@ -18,13 +18,20 @@
     "build:cli": "vite build --config vite.config.cli.mts",
     "preview": "vite preview",
     "test:ui": "vite --config test/vite.config.mts",
-    "test:cli-build": "npm run build:cli && node test/setup-test-app.mjs",
-    "test:cli-serve": "cd temp/test-app && thatopen dev --platform",
+    "test:cli-build-app": "npm run build:cli && node test/setup-test-app.mjs",
+    "test:cli-serve-app": "cd temp/test-app && thatopen dev --platform",
+    "test:cli-build-component": "npm run build:cli && node test/setup-test-component.mjs",
+    "test:cli-run-component": "cd temp/test-component && thatopen run --skip-build",
     "create-version": "yarn build && yarn changeset && yarn changeset version && yarn changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
+    "@thatopen/components": "^3.3.1",
+    "@thatopen/components-front": "^3.3.1",
+    "@thatopen/ui": "^3.3.3",
+    "@thatopen/ui-obc": "^3.3.3",
     "@types/node": "^20.12.12",
+    "@types/three": "^0.182.0",
     "commander": "^14.0.3",
     "eslint": "9.x",
     "eslint-config-prettier": "^9.1.0",
@@ -32,6 +39,7 @@
     "globals": "^15.3.0",
     "jszip": "^3.10.1",
     "prettier": "^3.2.5",
+    "three": "^0.182.0",
     "tsx": "^4.16.2",
     "typescript": "^5.2.2",
     "typescript-eslint": "^7.10.0",
@@ -42,5 +50,21 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "socket.io-client": "^4.8.0"
+  },
+  "peerDependencies": {
+    "@thatopen/components": "^3.3.1",
+    "@thatopen/ui": "^3.3.3",
+    "three": "^0.182.0"
+  },
+  "peerDependenciesMeta": {
+    "@thatopen/components": {
+      "optional": true
+    },
+    "@thatopen/ui": {
+      "optional": true
+    },
+    "three": {
+      "optional": true
+    }
   }
 }

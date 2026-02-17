@@ -570,6 +570,61 @@ export class EngineServicesClient {
     );
   }
 
+  // ─── Built-in Components ─────────────────────────────────────────
+
+  /**
+   * Fetches a built-in component's JavaScript bundle by name.
+   * @param name - The built-in component name (e.g. "hello-world").
+   * @returns The component's JavaScript source code as a string.
+   */
+  async getBuiltInComponent(name: string): Promise<string> {
+    const response = await this.#requestFile(`built-in/${name}/bundle`);
+    return await response.text();
+  }
+
+  /**
+   * Fetches a built-in component bundle, evaluates it, and registers it
+   * with the given `components` instance via `components.get()`.
+   *
+   * After calling this, retrieve the singleton instance with
+   * `components.get(ComponentClass)`.
+   *
+   * @param component - The component class stub (must have a static `uuid`).
+   * @param components - The OBC `Components` instance used to register the
+   *   component (must expose a `.get()` method).
+   * @param globals - Map of global names to values that the component source
+   *   expects in scope (e.g. `{ OBC, BUI }`). Defaults to
+   *   `window.ThatOpenCompany` if not provided.
+   *
+   * @example
+   * ```ts
+   * import { HelloWorld } from "thatopen-services";
+   *
+   * await client.initBuiltInComponent(HelloWorld, components, { OBC, BUI });
+   * const hw = components.get(HelloWorld);
+   * hw.greet("World"); // fully typed
+   * ```
+   */
+  async initBuiltInComponent(
+    component: { uuid: string },
+    components: { get: (c: new (components: any) => any) => any },
+    globals?: Record<string, unknown>,
+  ): Promise<void> {
+    const source = await this.getBuiltInComponent(component.uuid);
+    const resolvedGlobals =
+      globals ?? (typeof window !== 'undefined' ? (window as any).ThatOpenCompany : {}) ?? {};
+
+    const keys = Object.keys(resolvedGlobals);
+    const values = keys.map((k) => resolvedGlobals[k]);
+
+    // eslint-disable-next-line no-new-func
+    const factory = new Function(...keys, `${source}\nreturn main;`);
+    const main = factory(...values);
+
+    const componentDefinition = main?.componentDefinition ?? main;
+    components.get(componentDefinition);
+  }
+
   // ─── Apps ────────────────────────────────────────────────────────
 
   /**

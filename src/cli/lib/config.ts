@@ -40,10 +40,15 @@ export function requireConfig(): ThatOpenConfig {
 // Local project config (.thatopen in project root)
 // ---------------------------------------------------------------------------
 
+export type ProjectType = 'APP' | 'COMPONENT';
+
 export interface ThatOpenLocalConfig {
   accessToken: string;
   apiUrl: string;
   appId?: string;
+  componentId?: string;
+  /** Project type marker set by `thatopen create`. */
+  itemType?: ProjectType;
 }
 
 const LOCAL_CONFIG_FILE = '.thatopen';

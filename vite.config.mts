@@ -19,6 +19,7 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       include: ['src'],
+      copyDtsFiles: true,
     }),
   ],
 });
