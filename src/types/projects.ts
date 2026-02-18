@@ -39,24 +39,24 @@ export interface ProjectWithRole {
   role: ProjectRole | null;
 }
 
-// ─── Project Context DTO ──────────────────────────────────────────
+// ─── Project Data DTO ─────────────────────────────────────────────
 
 /** Stripped-down user info safe for app consumption. */
-export interface ProjectContextUser {
+export interface ProjectDataUser {
   _id: string;
   fullName: string;
   email: string;
 }
 
 /** A project member with their role info. */
-export interface ProjectContextMember {
+export interface ProjectDataMember {
   projectUserId: string;
-  user: ProjectContextUser;
+  user: ProjectDataUser;
   role: ProjectRole;
 }
 
-/** Minimal file info for the project context. */
-export interface ProjectContextFile {
+/** Minimal file info for the project data. */
+export interface ProjectDataFile {
   _id: string;
   name: string;
   fileExtension?: string;
@@ -65,19 +65,19 @@ export interface ProjectContextFile {
   createdAt: string;
 }
 
-/** Minimal folder info for the project context. */
-export interface ProjectContextFolder {
+/** Minimal folder info for the project data. */
+export interface ProjectDataFolder {
   _id: string;
   name: string;
   parentId?: string;
 }
 
-/** Aggregated project context returned by `getProjectContext()`. */
-export interface ProjectContext {
+/** Aggregated project data returned by `getProjectData()`. */
+export interface ProjectData {
   project: Project;
-  currentUser: ProjectContextMember | null;
-  users: ProjectContextMember[];
+  currentUser: ProjectDataMember | null;
+  users: ProjectDataMember[];
   roles: ProjectRole[];
-  files: ProjectContextFile[];
-  folders: ProjectContextFolder[];
+  files: ProjectDataFile[];
+  folders: ProjectDataFolder[];
 }

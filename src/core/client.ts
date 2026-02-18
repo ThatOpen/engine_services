@@ -17,7 +17,7 @@ import {
 } from '../types/items';
 import { CreateItemResponse, UpdateItemResponse } from '../types/response';
 import { CreateHiddenItemResult, HiddenFileEntity } from '../types/files';
-import { Project, ProjectContext } from '../types/projects';
+import { Project, ProjectData } from '../types/projects';
 
 const FOLDER_PATH = 'item/folder';
 const ITEM_PATH = 'item';
@@ -1029,11 +1029,11 @@ export class EngineServicesClient {
   // ─── Projects ────────────────────────────────────────────────────
 
   /**
-   * Gets project data by ID. Requires JWT auth or a future PublicAuth endpoint.
+   * Gets a project by ID. Requires JWT auth or a future PublicAuth endpoint.
    * @param projectId - The project's unique identifier.
    * @returns The project entity.
    */
-  async getProjectData(projectId: string) {
+  async getProject(projectId: string) {
     return await this.#requestApi<Project>(
       'GET',
       `${PROJECT_PATH}/${projectId}`,
@@ -1041,15 +1041,15 @@ export class EngineServicesClient {
   }
 
   /**
-   * Gets the full project context, including users, roles, files, and folders.
+   * Gets the full project data, including users, roles, files, and folders.
    * User data is stripped of sensitive fields server-side.
    * @param projectId - The project's unique identifier.
-   * @returns The aggregated project context DTO.
+   * @returns The aggregated project data DTO.
    */
-  async getProjectContext(projectId: string) {
-    return await this.#requestApi<ProjectContext>(
+  async getProjectData(projectId: string) {
+    return await this.#requestApi<ProjectData>(
       'GET',
-      `${PROJECT_PATH}/${projectId}/context`,
+      `${PROJECT_PATH}/${projectId}/data`,
     );
   }
 
