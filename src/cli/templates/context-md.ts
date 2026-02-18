@@ -223,6 +223,11 @@ client.onExecutionProgress(executionId, (data) => {
   // data.progressUpdate — progress percentage
   // data.messageUpdate — status messages
 });
+
+// Test against a local cloud component (requires thatopen local-server running in the component project)
+client.localServerUrl = "http://localhost:4001";
+const local = await client.executeComponent("any-id", { param: "value" });
+client.localServerUrl = null; // reset to use the cloud API
 \`\`\`
 
 ## Configuration
@@ -352,10 +357,11 @@ It runs on the server as a Node.js process, triggered via the platform API.
 ## Commands
 
 \`\`\`bash
-npm run build      # Build dist/bundle.js
-npm run run        # Build and run locally (uses thatopen run)
-npm run login      # Authenticate with the platform (saves token locally)
-npm run publish    # Publish to the platform
+npm run build          # Build dist/bundle.js
+npm run run            # Build and run locally (one-shot execution via thatopen run)
+npm run local-server   # Start local execution server (API-compatible with EngineServicesClient)
+npm run login          # Authenticate with the platform (saves token locally)
+npm run publish        # Publish to the platform
 \`\`\`
 
 To pass parameters when running locally:
@@ -363,6 +369,34 @@ To pass parameters when running locally:
 \`\`\`bash
 npx thatopen run --params '{"inputFile": "model.ifc", "threshold": 0.5}'
 \`\`\`
+
+### Local execution server
+
+The local server (\`npm run local-server\`) starts an HTTP + WebSocket server that implements
+the same execution API as the cloud. This lets apps using \`EngineServicesClient\` test against
+local component code without publishing:
+
+\`\`\`bash
+npm run local-server                     # Start on default port 4001
+npx thatopen local-server --port 5000    # Custom port
+\`\`\`
+
+Then in your app or test script:
+
+\`\`\`ts
+import { EngineServicesClient } from "thatopen-services";
+
+const client = new EngineServicesClient(token, apiUrl, {
+  localServerUrl: "http://localhost:4001",
+});
+
+const { executionId } = await client.executeComponent("any-id", { param: "value" });
+client.onExecutionProgress(executionId, (data) => {
+  console.log(data.progressUpdate?.progress);
+});
+\`\`\`
+
+The server watches source files and auto-rebuilds — changes are picked up on the next execution.
 
 ## Globals available at runtime
 

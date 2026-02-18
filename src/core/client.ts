@@ -106,6 +106,20 @@ export type EngineServicesClientProps = {
    * Auth0 JWT (e.g. inside platform apps) rather than a platform API token.
    */
   useBearer?: boolean;
+  /**
+   * URL of a local execution server started with `thatopen local-server`.
+   * When set, execution methods (executeComponent, onExecutionProgress,
+   * listExecutions, getExecution, abortExecution) are routed to this server
+   * instead of the cloud API. All other methods remain unchanged.
+   *
+   * @example
+   * ```ts
+   * const client = new EngineServicesClient(token, apiUrl, {
+   *   localServerUrl: 'http://localhost:4001',
+   * });
+   * ```
+   */
+  localServerUrl?: string;
 };
 
 /**
@@ -131,6 +145,13 @@ export class EngineServicesClient {
   private builtInGlobals: Record<string, unknown> | null = null;
 
   /**
+   * URL of a local execution server (e.g. `http://localhost:4001`).
+   * When set, execution methods are routed to this server instead of the cloud API.
+   * Set to `null` to disable local routing and use the cloud API.
+   */
+  localServerUrl: string | null = null;
+
+  /**
    * Creates a new EngineServicesClient instance.
    * @param accessToken - API access token (obtained from the platform dashboard)
    *   or an Auth0 JWT (when using `useBearer: true`).
@@ -142,7 +163,7 @@ export class EngineServicesClient {
     apiUrl: string,
     props?: EngineServicesClientProps,
   ) {
-    const { retries = 0, useBearer = false } = props || {};
+    const { retries = 0, useBearer = false, localServerUrl } = props || {};
     let url = apiUrl;
     if (url.charAt(url.length - 1) === '/') {
       url = url.slice(0, -1);
@@ -152,6 +173,13 @@ export class EngineServicesClient {
     this.wsUrl = `${url}?accessToken=${accessToken}`;
     this.retries = retries;
     this.useBearer = useBearer;
+    if (localServerUrl) {
+      let lsUrl = localServerUrl;
+      if (lsUrl.charAt(lsUrl.length - 1) === '/') {
+        lsUrl = lsUrl.slice(0, -1);
+      }
+      this.localServerUrl = lsUrl;
+    }
   }
 
   /**
@@ -758,6 +786,19 @@ export class EngineServicesClient {
     executionParams: object,
     versionTag?: string,
   ) {
+    if (this.localServerUrl) {
+      const url = `${this.localServerUrl}/api/${PROCESS_PATH}/${componentId}/execute`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(executionParams),
+      });
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`Local server request failed: ${response.status} - ${text}`);
+      }
+      return (await response.json()) as { executionId: string };
+    }
     return await this.#requestApi<{ executionId: string }>(
       'POST',
       `${PROCESS_PATH}/${componentId}/execute`,
@@ -774,6 +815,15 @@ export class EngineServicesClient {
    * @param executionId - The execution's unique identifier.
    */
   async abortExecution(executionId: string) {
+    if (this.localServerUrl) {
+      const url = `${this.localServerUrl}/api/${PROCESS_PATH}/progress/${executionId}/abort`;
+      const response = await fetch(url, { method: 'POST' });
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`Local server request failed: ${response.status} - ${text}`);
+      }
+      return (await response.json()) as ExecutionEntity;
+    }
     return await this.#requestApi<ExecutionEntity>(
       'POST',
       `${PROCESS_PATH}/progress/${executionId}/abort`,
@@ -786,6 +836,15 @@ export class EngineServicesClient {
    * @returns Array of execution entities.
    */
   async listExecutions(componentId: string) {
+    if (this.localServerUrl) {
+      const url = `${this.localServerUrl}/api/${PROCESS_PATH}/${componentId}/progress`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`Local server request failed: ${response.status} - ${text}`);
+      }
+      return (await response.json()) as ExecutionEntity[];
+    }
     return await this.#requestApi<ExecutionEntity[]>(
       'GET',
       `${PROCESS_PATH}/${componentId}/progress`,
@@ -798,6 +857,15 @@ export class EngineServicesClient {
    * @returns The execution entity with progress and result info.
    */
   async getExecution(executionId: string) {
+    if (this.localServerUrl) {
+      const url = `${this.localServerUrl}/api/${PROCESS_PATH}/progress/${executionId}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`Local server request failed: ${response.status} - ${text}`);
+      }
+      return (await response.json()) as ExecutionEntity;
+    }
     return await this.#requestApi<ExecutionEntity>(
       'GET',
       `${PROCESS_PATH}/progress/${executionId}`,
@@ -814,7 +882,12 @@ export class EngineServicesClient {
     executionId: string,
     onUpdateCallback: (data: ExecutionSuscriptionReturnType) => void,
   ) {
-    const socket = await io(this.wsUrl);
+    const wsUrl = this.localServerUrl
+      ? `${this.localServerUrl}?accessToken=${this.accessToken}`
+      : this.wsUrl;
+    const socket = await io(wsUrl, {
+      ...(this.localServerUrl && { transports: ['websocket'] }),
+    });
 
     socket.on('connect', function () {
       socket.emit('executionSubscription', JSON.stringify({ executionId }));

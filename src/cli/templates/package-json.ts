@@ -20,6 +20,7 @@ export function getPackageJson(appName: string, template?: string): string {
       scripts: {
         build: 'vite build',
         run: 'thatopen run',
+        'local-server': 'thatopen local-server',
         login: 'thatopen login --local',
         publish: 'thatopen publish',
       },

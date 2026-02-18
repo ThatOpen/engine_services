@@ -23,6 +23,7 @@
     "test:cli-serve-app": "cd temp/test-app && thatopen serve",
     "test:cli-build-component": "npm run build:cli && node test/setup-test-component.mjs",
     "test:cli-run-component": "cd temp/test-component && thatopen run --skip-build",
+    "test:cli-local-server": "cd temp/test-component && thatopen local-server",
     "create-version": "yarn build && yarn changeset && yarn changeset version && yarn changeset publish"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@thatopen/ui-obc": "^3.3.3",
     "@types/node": "^20.12.12",
     "@types/three": "^0.182.0",
+    "@types/ws": "^8.18.1",
     "commander": "^14.0.3",
     "esbuild": "^0.27.3",
     "eslint": "9.x",
@@ -47,7 +49,8 @@
     "typescript-eslint": "^7.10.0",
     "vite": "^5.2.0",
     "vite-plugin-dts": "^3.9.1",
-    "vite-plugin-eslint": "^1.8.1"
+    "vite-plugin-eslint": "^1.8.1",
+    "ws": "^8.19.0"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

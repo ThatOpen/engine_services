@@ -32,6 +32,9 @@ export default defineConfig({
         // esbuild is a native binary — cannot be bundled.
         // Resolved from the user's node_modules at runtime (Vite depends on it).
         'esbuild',
+        // ws is used for WebSocket server in the local-server command.
+        // Must be external because it has native optional deps.
+        'ws',
       ],
       output: {
         banner: '#!/usr/bin/env node',
