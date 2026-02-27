@@ -9,7 +9,6 @@ Client library and CLI for building BIM apps and cloud components on the [That O
 ```bash
 npx thatopen create my-app
 cd my-app
-npm install
 npm run dev
 
 # Open your project on platform.thatopen.com and click the debug button
@@ -20,7 +19,6 @@ npm run dev
 ```bash
 npx thatopen create my-component --template cloud
 cd my-component
-npm install
 npm run run   # Build and test locally
 ```
 
@@ -83,9 +81,9 @@ const client = new EngineServicesClient(ctx.accessToken, ctx.apiUrl, { useBearer
 Apps run inside the That Open Platform (platform.thatopen.com) within a project. They are served inside the platform's iframe — not as standalone websites.
 
 ```bash
-# 1. Create and install
+# 1. Create project (dependencies are installed automatically)
 npx thatopen create my-app
-cd my-app && npm install
+cd my-app
 
 # 2. Develop locally
 npm run dev
@@ -102,9 +100,9 @@ npm run publish
 ## Cloud component workflow
 
 ```bash
-# 1. Create and install
+# 1. Create project (dependencies are installed automatically)
 npx thatopen create my-component --template cloud
-cd my-component && npm install
+cd my-component
 
 # 2. Run locally
 npm run run

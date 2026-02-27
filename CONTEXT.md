@@ -162,11 +162,12 @@ Full API reference with config interfaces, method signatures, and `@example` blo
 ## CLI commands
 
 ```bash
-thatopen create <name> [--template bim|default|cloud]   # Scaffold project
+thatopen create <name> [--template bim|default|cloud]   # Scaffold project + auto npm install
 thatopen serve [--port N]                                # Dev server (esbuild watch + serve bundle)
 thatopen login [--token T] [--api-url U] [--local]       # Authenticate
 thatopen publish [--name N] [--version-tag T] [--skip-build] [--app-id ID | --component-id ID]
 thatopen run [--params '{}'] [--skip-build]              # Test cloud component locally
+thatopen local-server [--port N] [--skip-build]          # Local execution server (API-compatible)
 ```
 
 ## Dependencies

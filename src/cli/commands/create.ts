@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { execSync } from 'node:child_process';
 import { getIndexHtml } from '../templates/index-html';
 import { getMainTs } from '../templates/main-js';
 import { getMainBim } from '../templates/main-bim';
@@ -86,12 +87,20 @@ export const createCommand = new Command('create')
       );
     }
 
+    // Install dependencies automatically
+    console.log('');
+    console.log('Installing dependencies...');
+    try {
+      execSync('npm install', { cwd: targetDir, stdio: 'inherit' });
+    } catch {
+      console.error('Failed to install dependencies. Run `npm install` manually.');
+    }
+
     console.log('');
     console.log(`  Created ./${projectName}`);
     console.log('');
     console.log('  Next steps:');
     console.log(`    cd ${projectName}`);
-    console.log('    npm install');
     if (isCloud) {
       console.log('    npm run login -- --token <token>     # Authenticate');
       console.log('    npm run run                          # Test locally');

@@ -22,12 +22,6 @@ execSync(`node ${resolve(root, 'dist/cli.js')} create test-component -t cloud`, 
   stdio: 'inherit',
 });
 
-// Install dependencies
-execSync('npm install', {
-  cwd: componentDir,
-  stdio: 'inherit',
-});
-
 // Link local thatopen-services so the test component uses the local build
 execSync('npm link thatopen-services', {
   cwd: componentDir,

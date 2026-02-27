@@ -22,12 +22,6 @@ execSync(`node ${resolve(root, 'dist/cli.js')} create test-app`, {
   stdio: 'inherit',
 });
 
-// Install dependencies
-execSync('npm install', {
-  cwd: appDir,
-  stdio: 'inherit',
-});
-
 // Link local thatopen-services so the test app uses the local build
 execSync('npm link thatopen-services', {
   cwd: appDir,
