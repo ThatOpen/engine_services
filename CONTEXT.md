@@ -163,6 +163,7 @@ Full API reference with config interfaces, method signatures, and `@example` blo
 
 ```bash
 thatopen create <name> [--template bim|default|cloud]   # Scaffold project + auto npm install
+                                                        # Use "." as name to scaffold in current directory
 thatopen serve [--port N]                                # Dev server (esbuild watch + serve bundle)
 thatopen login [--token T] [--api-url U] [--local]       # Authenticate
 thatopen publish [--name N] [--version-tag T] [--skip-build] [--app-id ID | --component-id ID]

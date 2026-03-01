@@ -14,6 +14,14 @@ npm run dev
 # Open your project on platform.thatopen.com and click the debug button
 ```
 
+You can also scaffold in the current directory:
+
+```bash
+mkdir my-app && cd my-app
+npx thatopen create .
+npm run dev
+```
+
 ### Create a cloud component
 
 ```bash
@@ -29,6 +37,8 @@ npm run run   # Build and test locally
 | `bim` (default) | `npx thatopen create my-app` | Three.js + BIM viewer + platform UI components |
 | `default` | `npx thatopen create my-app --template default` | Minimal app showing platform context |
 | `cloud` | `npx thatopen create my-component --template cloud` | Server-side Node.js component |
+
+Use `npx thatopen create .` to scaffold in the current directory instead of creating a new one.
 
 ## What's in this package
 
@@ -70,7 +80,7 @@ const client = new EngineServicesClient(ctx.accessToken, ctx.apiUrl, { useBearer
 
 | Command | Description |
 |---------|-------------|
-| `thatopen create <name> [--template bim\|default\|cloud]` | Scaffold a new project |
+| `thatopen create <name> [--template bim\|default\|cloud]` | Scaffold a new project (use `.` for current directory) |
 | `thatopen serve [--port N]` | Dev server (esbuild watch + serve bundle) |
 | `thatopen login [--token T] [--local]` | Authenticate with the platform |
 | `thatopen publish` | Build and publish to the platform |
