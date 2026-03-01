@@ -7,4 +7,4 @@ export interface Base {
   archived?: boolean;
 }
 
-export type ObjectId = string | any;
+export type ObjectId = string;

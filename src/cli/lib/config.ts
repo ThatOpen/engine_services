@@ -49,6 +49,8 @@ export interface ThatOpenLocalConfig {
   componentId?: string;
   /** Project type marker set by `thatopen create`. */
   itemType?: ProjectType;
+  /** Path to an icon file (PNG, WebP, or ICO) uploaded on publish. */
+  iconPath?: string;
 }
 
 const LOCAL_CONFIG_FILE = '.thatopen';

@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { existsSync, readFileSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { join, basename, extname } from 'node:path';
 import { execSync } from 'node:child_process';
 import {
   requireResolvedConfig,
@@ -23,6 +23,7 @@ export const publishCommand = new Command('publish')
     'Existing component ID to publish a new version for',
   )
   .option('--skip-build', 'Skip the build step')
+  .option('--icon <path>', 'Path to an icon file (PNG, WebP, or ICO, max 512 KB)')
   .action(
     async (opts: {
       name?: string;
@@ -30,6 +31,7 @@ export const publishCommand = new Command('publish')
       appId?: string;
       componentId?: string;
       skipBuild?: boolean;
+      icon?: string;
     }) => {
       const cwd = process.cwd();
       const config = requireResolvedConfig(cwd);
@@ -89,6 +91,9 @@ export const publishCommand = new Command('publish')
       const zipBuffer = readFileSync(zipPath);
       const zipBlob = new Blob([zipBuffer]);
 
+      // Resolve icon: CLI flag > local config
+      const iconPath = opts.icon || localConfig?.iconPath;
+
       // Upload
       const client = new EngineServicesClient(
         config.accessToken,
@@ -96,8 +101,10 @@ export const publishCommand = new Command('publish')
       );
 
       try {
+        let itemId: string | undefined;
+
         if (isComponent) {
-          await publishComponent(
+          itemId = await publishComponent(
             client,
             existingId,
             zipBlob,
@@ -106,7 +113,7 @@ export const publishCommand = new Command('publish')
             cwd,
           );
         } else {
-          await publishApp(
+          itemId = await publishApp(
             client,
             existingId,
             zipBlob,
@@ -114,6 +121,11 @@ export const publishCommand = new Command('publish')
             versionTag,
             cwd,
           );
+        }
+
+        // Upload icon if specified
+        if (iconPath && itemId) {
+          await uploadIcon(client, itemId, iconPath, opts.icon, cwd);
         }
 
         console.log('Published successfully!');
@@ -150,7 +162,7 @@ async function publishApp(
   name: string,
   versionTag: string,
   cwd: string,
-) {
+): Promise<string | undefined> {
   if (appId) {
     // Auto-recover if the app was archived (deleted from UI)
     const existing = await client.getFile(appId);
@@ -169,6 +181,7 @@ async function publishApp(
       {}, // extraProps required by backend for APP items
     );
     console.log('Version created:', JSON.stringify(result, null, 2));
+    return appId;
   } else {
     console.log(`Publishing new app "${name}" (${versionTag})...`);
     const result = await client.createApp({
@@ -184,6 +197,7 @@ async function publishApp(
       updateLocalConfig({ appId: String(newAppId) }, cwd);
       console.log(`App ID saved to .thatopen (${newAppId})`);
     }
+    return newAppId ? String(newAppId) : undefined;
   }
 }
 
@@ -198,7 +212,7 @@ async function publishComponent(
   name: string,
   versionTag: string,
   cwd: string,
-) {
+): Promise<string | undefined> {
   const componentProps = {
     type: 'CLOUD' as const,
     tier: 'FREE' as const,
@@ -222,6 +236,7 @@ async function publishComponent(
       componentProps,
     });
     console.log('Version created:', JSON.stringify(result, null, 2));
+    return componentId;
   } else {
     console.log(
       `Publishing new cloud component "${name}" (${versionTag})...`,
@@ -240,5 +255,51 @@ async function publishComponent(
       updateLocalConfig({ componentId: String(newId) }, cwd);
       console.log(`Component ID saved to .thatopen (${newId})`);
     }
+    return newId ? String(newId) : undefined;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Icon upload helper
+// ---------------------------------------------------------------------------
+
+const ALLOWED_ICON_EXTENSIONS = ['.png', '.webp', '.ico'];
+const MAX_ICON_SIZE = 512 * 1024; // 512 KB
+
+async function uploadIcon(
+  client: EngineServicesClient,
+  itemId: string,
+  iconPath: string,
+  cliIconFlag: string | undefined,
+  cwd: string,
+) {
+  const resolvedPath = join(cwd, iconPath);
+
+  if (!existsSync(resolvedPath)) {
+    console.error(`Icon file not found: ${resolvedPath}`);
+    return;
+  }
+
+  const ext = extname(resolvedPath).toLowerCase();
+  if (!ALLOWED_ICON_EXTENSIONS.includes(ext)) {
+    console.error(`Unsupported icon format "${ext}". Use PNG, WebP, or ICO.`);
+    return;
+  }
+
+  const size = statSync(resolvedPath).size;
+  if (size > MAX_ICON_SIZE) {
+    console.error(`Icon too large (${Math.round(size / 1024)} KB). Maximum is 512 KB.`);
+    return;
+  }
+
+  console.log('Uploading icon...');
+  const iconBuffer = readFileSync(resolvedPath);
+  const iconBlob = new Blob([iconBuffer]);
+  await client.uploadItemIcon(itemId, iconBlob);
+  console.log('Icon uploaded.');
+
+  // Save icon path to local config if provided via CLI flag
+  if (cliIconFlag) {
+    updateLocalConfig({ iconPath: iconPath }, cwd);
   }
 }

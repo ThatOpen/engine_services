@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && vite build --config vite.config.cli.mts",
+    "lint": "eslint src/",
+    "build": "eslint src/ && tsc && vite build && vite build --config vite.config.cli.mts",
     "build:lib": "tsc && vite build",
     "build:cli": "vite build --config vite.config.cli.mts",
     "preview": "vite preview",
