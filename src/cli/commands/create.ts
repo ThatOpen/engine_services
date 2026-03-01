@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { getIndexHtml } from '../templates/index-html';
 import { getMainTs } from '../templates/main-js';
@@ -38,7 +38,7 @@ function getContextMd(template: Template): string {
 }
 
 export const createCommand = new Command('create')
-  .argument('<project-name>', 'Name of the project to create')
+  .argument('<project-name>', 'Name of the project to create (use "." for current directory)')
   .option('-t, --template <template>', `Template (${TEMPLATES.join(', ')})`, 'bim')
   .description('Scaffold a new ThatOpen app or cloud component project')
   .action(async (projectName: string, opts: { template: string }) => {
@@ -51,18 +51,27 @@ export const createCommand = new Command('create')
 
     const isCloud = template === 'cloud';
     const projectKind = isCloud ? 'cloud component' : 'app';
+    const useCurrentDir = projectName === '.';
 
-    const targetDir = resolve(process.cwd(), projectName);
+    const targetDir = useCurrentDir
+      ? process.cwd()
+      : resolve(process.cwd(), projectName);
 
-    if (existsSync(targetDir)) {
+    const packageName = useCurrentDir
+      ? basename(process.cwd())
+      : projectName;
+
+    if (!useCurrentDir && existsSync(targetDir)) {
       console.error(`Directory "${projectName}" already exists.`);
       process.exit(1);
     }
 
-    console.log(`Creating ThatOpen ${projectKind} "${projectName}" (template: ${template})...`);
+    console.log(`Creating ThatOpen ${projectKind} "${packageName}" (template: ${template})...`);
 
-    mkdirSync(targetDir, { recursive: true });
-    mkdirSync(join(targetDir, 'src'));
+    if (!useCurrentDir) {
+      mkdirSync(targetDir, { recursive: true });
+    }
+    mkdirSync(join(targetDir, 'src'), { recursive: true });
 
     // Cloud components don't need index.html
     if (!isCloud) {
@@ -71,7 +80,7 @@ export const createCommand = new Command('create')
 
     writeFileSync(join(targetDir, 'src', 'main.ts'), getMainSource(template));
     writeFileSync(join(targetDir, 'vite.config.js'), getViteConfig(template));
-    writeFileSync(join(targetDir, 'package.json'), getPackageJson(projectName, template));
+    writeFileSync(join(targetDir, 'package.json'), getPackageJson(packageName, template));
     writeFileSync(
       join(targetDir, '.gitignore'),
       'node_modules\ndist\n*.zip\n.thatopen\n',
@@ -97,10 +106,12 @@ export const createCommand = new Command('create')
     }
 
     console.log('');
-    console.log(`  Created ./${projectName}`);
+    console.log(useCurrentDir ? '  Project ready!' : `  Created ./${projectName}`);
     console.log('');
     console.log('  Next steps:');
-    console.log(`    cd ${projectName}`);
+    if (!useCurrentDir) {
+      console.log(`    cd ${projectName}`);
+    }
     if (isCloud) {
       console.log('    npm run login -- --token <token>     # Authenticate');
       console.log('    npm run run                          # Test locally');

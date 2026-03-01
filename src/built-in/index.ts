@@ -81,6 +81,9 @@ declare class _AppManager {
     private _container;
     /** Whether the app has been initialised via {@link init}. */
     private _initialized;
+    private static readonly STORAGE_KEY;
+    /** Whether the sidebar buttons are collapsed (icon-only). */
+    private _sidebarCollapsed;
     constructor(components: any);
     /**
      * The setup configuration that defines elements and layouts.
@@ -108,6 +111,11 @@ declare class _AppManager {
      * Creates the sidebar element with layout-switching buttons.
      */
     private _createSidebar;
+    /**
+     * Pauses renderer resize observers, runs a layout-changing callback,
+     * then resizes and force-renders on the next frame to avoid canvas blink.
+     */
+    private _safeLayoutChange;
     /**
      * Highlights the active layout button in the sidebar.
      */
