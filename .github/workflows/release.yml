@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -51,6 +50,6 @@ jobs:
         if: steps.changesets.outputs.count != '0'
         run: |
           yarn build
-          yarn changeset publish --provenance
+          yarn changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
