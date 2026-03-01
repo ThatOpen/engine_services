@@ -739,7 +739,6 @@ export class EngineServicesClient {
     const keys = Object.keys(resolvedGlobals);
     const values = keys.map((k) => resolvedGlobals[k]);
 
-    // eslint-disable-next-line no-new-func
     const factory = new Function(...keys, `${source}\nreturn main;`);
     const main = factory(...values);
 
