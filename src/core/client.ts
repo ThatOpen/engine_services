@@ -41,7 +41,8 @@ const ITEM_TYPE_APP = 'APP';
  * Avoids hard-coupling to `@thatopen/components` at the public API level.
  */
 export interface ComponentsLike {
-  get(c: new (components: ComponentsLike) => unknown): unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic constructor pattern requires any[]
+  get<T>(c: new (...args: any[]) => T): T;
   init(): void;
 }
 
