@@ -1079,6 +1079,46 @@ export class EngineServicesClient {
     );
   }
 
+  // ─── Icons ───────────────────────────────────────────────────────
+
+  /**
+   * Uploads or replaces the icon for an item (app, component, or file).
+   * Accepts PNG, WebP, or ICO images up to 512 KB.
+   * @param itemId - The item's unique identifier.
+   * @param icon - The icon image file (File in browsers, Blob in Node.js).
+   * @returns The updated item with `iconFileId` and `iconMimeType` set.
+   */
+  async uploadItemIcon(itemId: string, icon: File | Blob) {
+    const formData = new FormData();
+    formData.append('icon', icon);
+    return await this.#requestApi<Item>(
+      'PUT',
+      `${ITEM_PATH}/${itemId}/icon`,
+      { body: formData },
+    );
+  }
+
+  /**
+   * Downloads the icon for an item as a binary stream.
+   * @param itemId - The item's unique identifier.
+   * @returns The raw Response (use `.blob()`, `.arrayBuffer()`, or pipe the body).
+   */
+  async getItemIcon(itemId: string) {
+    return await this.#requestFile(`${ITEM_PATH}/${itemId}/icon`);
+  }
+
+  /**
+   * Removes the icon from an item.
+   * @param itemId - The item's unique identifier.
+   * @returns The updated item with icon fields removed.
+   */
+  async removeItemIcon(itemId: string) {
+    return await this.#requestApi<Item>(
+      'DELETE',
+      `${ITEM_PATH}/${itemId}/icon`,
+    );
+  }
+
   // ─── General Item Operations ─────────────────────────────────────
 
   /**
