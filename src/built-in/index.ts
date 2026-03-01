@@ -112,11 +112,6 @@ declare class _AppManager {
      */
     private _createSidebar;
     /**
-     * Pauses renderer resize observers, runs a layout-changing callback,
-     * then resizes and force-renders on the next frame to avoid canvas blink.
-     */
-    private _safeLayoutChange;
-    /**
      * Highlights the active layout button in the sidebar.
      */
     private _updateSidebarActive;
