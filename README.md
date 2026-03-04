@@ -7,6 +7,13 @@ Client library and CLI for building BIM apps and cloud components on the [That O
 ### Create a BIM app
 
 ```bash
+# Install the services package globally
+npm i thatopen-services -g
+```
+
+Then, create a brand new app repository:
+
+```bash
 npx thatopen create my-app
 cd my-app
 npm run dev
