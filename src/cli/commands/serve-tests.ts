@@ -4,9 +4,8 @@ import { spawn } from 'node:child_process';
 
 export const serveTestsCommand = new Command('serve-tests')
   .argument(
-    '[directory]',
-    'Parent directory containing both projects (defaults to current directory)',
-    '.',
+    '<directory>',
+    'Parent directory containing both projects',
   )
   .option('--app-name <name>', 'Name of the test app project', 'test-app')
   .option(

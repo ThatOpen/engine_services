@@ -5,9 +5,8 @@ import { spawnSync } from 'node:child_process';
 
 export const createTestsCommand = new Command('create-tests')
   .argument(
-    '[directory]',
-    'Parent directory for both projects (defaults to current directory)',
-    '.',
+    '<directory>',
+    'Parent directory for both projects (required to prevent accidental deletion)',
   )
   .option('--app-name <name>', 'Name of the test app project', 'test-app')
   .option(
