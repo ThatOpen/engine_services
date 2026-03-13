@@ -17,7 +17,7 @@ try {
 mkdirSync(tempDir, { recursive: true });
 
 // Scaffold the cloud component
-execSync(`node ${resolve(root, 'dist/cli.js')} create test-component -t cloud`, {
+execSync(`node ${resolve(root, 'dist/cli.js')} create test-component -t cloud-test`, {
   cwd: tempDir,
   stdio: 'inherit',
 });

@@ -44,6 +44,8 @@ npm run run   # Build and test locally
 | `bim` (default) | `npx thatopen create my-app` | Three.js + BIM viewer + platform UI components |
 | `default` | `npx thatopen create my-app --template default` | Minimal app showing platform context |
 | `cloud` | `npx thatopen create my-component --template cloud` | Server-side Node.js component |
+| `test` | `npx thatopen create my-tests --template test` | Browser test app that exercises every API endpoint |
+| `cloud-test` | `npx thatopen create my-tests --template cloud-test` | Cloud component test suite for server-side API testing |
 
 Use `npx thatopen create .` to scaffold in the current directory instead of creating a new one.
 
@@ -87,11 +89,13 @@ const client = new EngineServicesClient(ctx.accessToken, ctx.apiUrl, { useBearer
 
 | Command | Description |
 |---------|-------------|
-| `thatopen create <name> [--template bim\|default\|cloud]` | Scaffold a new project (use `.` for current directory) |
+| `thatopen create <name> [--template bim\|default\|cloud\|test\|cloud-test]` | Scaffold a new project (use `.` for current directory) |
 | `thatopen serve [--port N]` | Dev server (esbuild watch + serve bundle) |
 | `thatopen login [--token T] [--local]` | Authenticate with the platform |
 | `thatopen publish` | Build and publish to the platform |
 | `thatopen run [--params '{}']` | Build and test a cloud component locally |
+| `thatopen create-tests [directory]` | Scaffold both a test app and test cloud component |
+| `thatopen serve-tests [directory]` | Serve both the test app and test component in parallel |
 
 ## App workflow
 
@@ -227,6 +231,28 @@ npm run test:cli-build-component
 # Run the test cloud component locally
 npm run test:cli-run-component
 ```
+
+### Running the platform API test suite
+
+The test suite consists of two projects scaffolded together: a **test app** (browser-based, template `test`) and a **test cloud component** (server-side, template `cloud-test`). Both exercise every `EngineServicesClient` endpoint.
+
+```bash
+# 1. Build the CLI and scaffold both test projects into a temp/ directory
+#    (deletes temp/ first if it already exists)
+yarn test:cli-build-tests
+
+# 2. Serve both the test app and the test component's local server
+yarn test:cli-serve-tests
+```
+
+Then open your project on [platform.thatopen.com](https://platform.thatopen.com) and click the debug button. The test app will show a panel with:
+
+- **Context** — current app/project/API info
+- **Execution Config** — input fields for a deployed Component ID and the local server URL (defaults to `http://localhost:4001`)
+- **Controls** — "Run All Tests" button
+- **Results** — test results grouped by API area (Context & Auth, Folders, Files, Hidden Files, Icons, Components, Apps, Execution, Built-in Components)
+
+When execution tests run, the cloud component's output appears in the same Results section as additional groups prefixed with "Local Component:" or "Deployed Component:".
 
 ### Publishing a new version
 

@@ -1,5 +1,5 @@
 export function getTsconfig(template?: string): string {
-  if (template === 'cloud') {
+  if (template === 'cloud' || template === 'cloud-test') {
     return JSON.stringify(
       {
         compilerOptions: {

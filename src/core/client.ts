@@ -56,6 +56,8 @@ export type CreateItemProps = {
   versionTag: string;
   /** Optional folder ID to place the item in. */
   parentFolderId?: string;
+  /** Optional project ID to associate the item with. */
+  projectId?: string;
   /** Optional key-value metadata (max 30 KB when serialized). */
   metadata?: Record<string, string>;
 };
@@ -500,9 +502,13 @@ export class EngineServicesClient {
    * @param parentId - Optional parent folder ID for nesting.
    * @returns The created folder.
    */
-  async createFolder(name: string, parentId?: string) {
+  async createFolder(name: string, parentId?: string, projectId?: string) {
     return await this.#requestApi<ItemFolder>('POST', FOLDER_PATH, {
-      body: JSON.stringify({ name, ...(parentId && { parentId }) }),
+      body: JSON.stringify({
+        name,
+        ...(parentId && { parentId }),
+        ...(projectId && { projectId }),
+      }),
       contentType: 'application/json',
     });
   }
@@ -1257,13 +1263,15 @@ export class EngineServicesClient {
     itemType: ItemType,
     extraProps?: P,
   ) {
-    const { name, versionTag, parentFolderId, file, metadata } = fileData;
+    const { name, versionTag, parentFolderId, projectId, file, metadata } =
+      fileData;
     const formData = new FormData();
     formData.append('file', file);
     formData.append('name', name);
     formData.append('versionTag', versionTag);
     formData.append('itemType', itemType);
     parentFolderId && formData.append('folderId', parentFolderId);
+    projectId && formData.append('projectId', projectId);
 
     extraProps && formData.append('extraProps', JSON.stringify(extraProps));
     metadata &&

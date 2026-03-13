@@ -6,13 +6,15 @@ import { getIndexHtml } from '../templates/index-html';
 import { getMainTs } from '../templates/main-js';
 import { getMainBim } from '../templates/main-bim';
 import { getMainCloud } from '../templates/main-cloud';
+import { getMainTest } from '../templates/main-test';
+import { getMainCloudTest } from '../templates/main-cloud-test';
 import { getViteConfig } from '../templates/vite-config';
 import { getPackageJson } from '../templates/package-json';
-import { getContextMdBim, getContextMdDefault, getContextMdCloud } from '../templates/context-md';
+import { getContextMdBim, getContextMdDefault, getContextMdCloud, getContextMdTest, getContextMdCloudTest } from '../templates/context-md';
 import { getTsconfig } from '../templates/tsconfig';
 import { writeLocalConfig } from '../lib/config';
 
-const TEMPLATES = ['default', 'bim', 'cloud'] as const;
+const TEMPLATES = ['default', 'bim', 'cloud', 'test', 'cloud-test'] as const;
 type Template = (typeof TEMPLATES)[number];
 
 function getMainSource(template: Template): string {
@@ -21,6 +23,10 @@ function getMainSource(template: Template): string {
       return getMainBim();
     case 'cloud':
       return getMainCloud();
+    case 'test':
+      return getMainTest();
+    case 'cloud-test':
+      return getMainCloudTest();
     default:
       return getMainTs();
   }
@@ -32,6 +38,10 @@ function getContextMd(template: Template): string {
       return getContextMdBim();
     case 'cloud':
       return getContextMdCloud();
+    case 'test':
+      return getContextMdTest();
+    case 'cloud-test':
+      return getContextMdCloudTest();
     default:
       return getContextMdDefault();
   }
@@ -49,7 +59,7 @@ export const createCommand = new Command('create')
       process.exit(1);
     }
 
-    const isCloud = template === 'cloud';
+    const isCloud = template === 'cloud' || template === 'cloud-test';
     const projectKind = isCloud ? 'cloud component' : 'app';
     const useCurrentDir = projectName === '.';
 

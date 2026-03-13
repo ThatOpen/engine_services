@@ -17,7 +17,7 @@ try {
 mkdirSync(tempDir, { recursive: true });
 
 // Scaffold the app
-execSync(`node ${resolve(root, 'dist/cli.js')} create test-app`, {
+execSync(`node ${resolve(root, 'dist/cli.js')} create test-app -t test`, {
   cwd: tempDir,
   stdio: 'inherit',
 });

@@ -12,7 +12,7 @@ const libVersion: string = (() => {
 })();
 
 export function getPackageJson(appName: string, template?: string): string {
-  if (template === 'cloud') {
+  if (template === 'cloud' || template === 'cloud-test') {
     const pkg: Record<string, unknown> = {
       name: appName,
       version: '1.0.0',
@@ -55,6 +55,19 @@ export function getPackageJson(appName: string, template?: string): string {
   };
 
   if (template === 'bim') {
+    (pkg.dependencies as Record<string, string>) = {
+      '@thatopen/components': '^3.3.1',
+      '@thatopen/components-front': '^3.3.1',
+      '@thatopen/fragments': '^3.3.1',
+      '@thatopen/ui': '^3.3.3',
+      '@thatopen/ui-obc': '^3.3.3',
+      'thatopen-services': `^${libVersion}`,
+      three: '^0.182.0',
+    };
+    (pkg.devDependencies as Record<string, string>)['@types/three'] = '^0.182.0';
+  }
+
+  if (template === 'test') {
     (pkg.dependencies as Record<string, string>) = {
       '@thatopen/components': '^3.3.1',
       '@thatopen/components-front': '^3.3.1',

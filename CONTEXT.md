@@ -12,18 +12,20 @@ Client library and CLI for the That Open Platform — a cloud platform for build
 
 ```
 src/
-  core/client.ts          # EngineServicesClient — the main API class
+  core/client.ts              # EngineServicesClient — the main API class
   cli/
-    commands/create.ts    # thatopen create — scaffolds new projects
-    commands/serve.ts     # thatopen serve — dev server (esbuild watch + serve)
-    commands/login.ts     # thatopen login — authenticate with the platform
-    commands/publish.ts   # thatopen publish — build and upload to the platform
-    commands/run.ts       # thatopen run — test cloud components locally
-    templates/            # Template generators for scaffolded projects
-    lib/                  # CLI helper utilities (config, certificates)
-  built-in/index.ts       # Built-in component type stubs + runtime UUID constants
-  types/                  # TypeScript type definitions (items, execution, etc.)
-  index.ts                # Library entry point (re-exports everything)
+    commands/create.ts        # thatopen create — scaffolds new projects
+    commands/serve.ts         # thatopen serve — dev server (esbuild watch + serve)
+    commands/login.ts         # thatopen login — authenticate with the platform
+    commands/publish.ts       # thatopen publish — build and upload to the platform
+    commands/run.ts           # thatopen run — test cloud components locally
+    commands/create-tests.ts  # thatopen create-tests — scaffolds test app + test component
+    commands/serve-tests.ts   # thatopen serve-tests — serves both test projects in parallel
+    templates/                # Template generators for scaffolded projects
+    lib/                      # CLI helper utilities (config, certificates)
+  built-in/index.ts           # Built-in component type stubs + runtime UUID constants
+  types/                      # TypeScript type definitions (items, execution, etc.)
+  index.ts                    # Library entry point (re-exports everything)
 ```
 
 ## Build system
@@ -47,6 +49,8 @@ npm run test:ui                   # Interactive browser test page
 npm run test:cli-build-app        # Scaffold + build a test app
 npm run test:cli-build-component  # Scaffold + build a test cloud component
 npm run test:cli-run-component    # Run the test cloud component locally
+npm run test:cli-build-tests      # Build CLI + scaffold test app & test component into temp/
+npm run test:cli-serve-tests      # Serve the test app and test component's local server in parallel
 ```
 
 ### Publishing to npm
@@ -66,7 +70,7 @@ yarn create-version   # Build → changeset → version → publish
 | **Entry point** | Side effects in `main.ts` (renders UI) | `export async function main()` |
 | **Context** | `window.__THATOPEN_CONTEXT__` provides `{ appId, projectId, accessToken, apiUrl }` | Globals: `thatOpenServices`, `executionParams`, `executionReporter`, `OBC`, `THREE`, `fs` |
 | **Build output** | IIFE `dist/bundle.js` (all deps bundled) | IIFE `dist/bundle.js` (platform deps externalized) |
-| **Template** | `bim` or `default` | `cloud` |
+| **Template** | `bim`, `default`, or `test` | `cloud` or `cloud-test` |
 
 ### Authentication
 
@@ -162,13 +166,16 @@ Full API reference with config interfaces, method signatures, and `@example` blo
 ## CLI commands
 
 ```bash
-thatopen create <name> [--template bim|default|cloud]   # Scaffold project + auto npm install
+thatopen create <name> [--template bim|default|cloud|test|cloud-test]
+                                                        # Scaffold project + auto npm install
                                                         # Use "." as name to scaffold in current directory
 thatopen serve [--port N]                                # Dev server (esbuild watch + serve bundle)
 thatopen login [--token T] [--api-url U] [--local]       # Authenticate
 thatopen publish [--name N] [--version-tag T] [--skip-build] [--app-id ID | --component-id ID]
 thatopen run [--params '{}'] [--skip-build]              # Test cloud component locally
 thatopen local-server [--port N] [--skip-build]          # Local execution server (API-compatible)
+thatopen create-tests [directory]                        # Scaffold test app + test component (cleans directory first)
+thatopen serve-tests [directory]                         # Serve test app + test component in parallel
 ```
 
 ## Dependencies

@@ -1,5 +1,5 @@
 export function getViteConfig(template?: string): string {
-  if (template === 'cloud') {
+  if (template === 'cloud' || template === 'cloud-test') {
     return `// Production build config — builds dist/bundle.js as IIFE.
 // For local development, use: npm run dev (runs thatopen serve with esbuild).
 // Do NOT run "vite" or "vite build --watch" directly for dev.

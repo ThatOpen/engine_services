@@ -7,6 +7,8 @@ import { publishCommand } from './commands/publish';
 import { serveCommand } from './commands/serve';
 import { runCommand } from './commands/run';
 import { localServerCommand } from './commands/local-server';
+import { createTestsCommand } from './commands/create-tests';
+import { serveTestsCommand } from './commands/serve-tests';
 
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
 
@@ -23,5 +25,7 @@ program.addCommand(publishCommand);
 program.addCommand(serveCommand);
 program.addCommand(runCommand);
 program.addCommand(localServerCommand);
+program.addCommand(createTestsCommand);
+program.addCommand(serveTestsCommand);
 
 program.parse(process.argv);

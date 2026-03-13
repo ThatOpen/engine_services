@@ -24,7 +24,9 @@
     "test:cli-serve-app": "cd temp/test-app && thatopen serve",
     "test:cli-build-component": "npm run build:cli && node test/setup-test-component.mjs",
     "test:cli-run-component": "cd temp/test-component && thatopen run --skip-build",
-    "test:cli-local-server": "cd temp/test-component && thatopen local-server",
+    "test:cli-serve-component": "cd temp/test-component && thatopen local-server",
+    "test:cli-build-tests": "npm run build:cli && thatopen create-tests temp",
+    "test:cli-serve-tests": "thatopen serve-tests temp",
     "changeset": "changeset",
     "version": "changeset version"
   },
