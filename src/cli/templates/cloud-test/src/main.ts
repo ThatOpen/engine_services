@@ -4,7 +4,7 @@
 
 // Globals injected by the execution engine at runtime
 declare const thatOpenServices: import("thatopen-services").EngineServicesClient;
-declare const executionParams: Record<string, any>;
+declare const executionParams: Record<string, unknown>;
 declare const executionReporter: {
   message(msg: string): void;
   progress(pct: number): void;
@@ -31,8 +31,8 @@ async function runTest(
   try {
     await fn();
     return { name, status: "pass", message: "OK" };
-  } catch (err: any) {
-    return { name, status: "fail", message: err?.message || String(err) };
+  } catch (err) {
+    return { name, status: "fail", message: err instanceof Error ? err.message : String(err) };
   }
 }
 

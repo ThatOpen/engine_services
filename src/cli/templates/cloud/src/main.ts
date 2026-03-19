@@ -21,14 +21,18 @@
 //   Trigger another:  await thatOpenServices.executeComponent(componentId, params);
 
 // Globals injected by the execution engine at runtime — keep these for type checking
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare const thatOpenServices: import("thatopen-services").EngineServicesClient;
-declare const executionParams: Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+declare const executionParams: Record<string, unknown>;
 declare const executionReporter: {
   message(msg: string): void;
   progress(pct: number): void;
 };
 declare const OBC: typeof import("@thatopen/components");
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare const THREE: typeof import("three");
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare const fs: typeof import("fs");
 
 export async function main() {

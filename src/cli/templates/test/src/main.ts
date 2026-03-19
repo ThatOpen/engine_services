@@ -46,11 +46,11 @@ async function runTest(
       message: "OK",
       duration: performance.now() - start,
     };
-  } catch (err: any) {
+  } catch (err) {
     return {
       name,
       status: "fail",
-      message: err?.message || String(err),
+      message: err instanceof Error ? err.message : String(err),
       duration: performance.now() - start,
     };
   }
@@ -781,8 +781,8 @@ async function runAllTests(resultsEl: HTMLElement, client: EngineServicesClient,
         assert(!!result.executionId, "executionId missing");
         try {
           await client.abortExecution(result.executionId);
-        } catch (err: any) {
-          if (!err?.message?.includes("4")) throw err;
+        } catch (err) {
+          if (!(err instanceof Error && err.message.includes("4"))) throw err;
         }
       }),
     );
@@ -870,8 +870,8 @@ async function runAllTests(resultsEl: HTMLElement, client: EngineServicesClient,
         assert(!!result.executionId, "executionId missing");
         try {
           await client.abortExecution(result.executionId);
-        } catch (err: any) {
-          if (!err?.message?.includes("4")) throw err;
+        } catch (err) {
+          if (!(err instanceof Error && err.message.includes("4"))) throw err;
         }
       }),
     );
