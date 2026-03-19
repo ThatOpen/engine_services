@@ -10,12 +10,13 @@
     "thatopen": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "src/cli/templates"
   ],
   "scripts": {
     "dev": "vite",
     "lint": "eslint src/",
-    "build": "eslint src/ && tsc && vite build && vite build --config vite.config.cli.mts && node scripts/copy-templates.mjs",
+    "build": "eslint src/ && tsc && vite build && vite build --config vite.config.cli.mts",
     "build:lib": "tsc && vite build",
     "build:cli": "vite build --config vite.config.cli.mts && node scripts/copy-templates.mjs",
     "preview": "vite preview",

@@ -16,7 +16,7 @@ const libVersion: string = (() => {
   }
 })();
 
-const templatesDir = join(__dirname, 'templates');
+const templatesDir = join(__dirname, '..', 'src', 'cli', 'templates');
 
 export const createCommand = new Command('create')
   .argument('<project-name>', 'Name of the project to create (use "." for current directory)')
