@@ -1,0 +1,25 @@
+{
+  "name": "{{PROJECT_NAME}}",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "thatopen serve",
+    "build": "vite build",
+    "login": "thatopen login --local",
+    "publish": "thatopen publish"
+  },
+  "dependencies": {
+    "@thatopen/components": "~3.3.0",
+    "@thatopen/components-front": "~3.3.0",
+    "@thatopen/fragments": "~3.3.0",
+    "@thatopen/ui": "~3.3.0",
+    "@thatopen/ui-obc": "~3.3.0",
+    "thatopen-services": "^{{VERSION}}",
+    "three": "^0.182.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.182.0",
+    "typescript": "^5.2.0",
+    "vite": "^5.2.0"
+  }
+}

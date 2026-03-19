@@ -1,51 +1,22 @@
 import { Command } from 'commander';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, renameSync, cpSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
-import { getIndexHtml } from '../templates/index-html';
-import { getMainTs } from '../templates/main-js';
-import { getMainBim } from '../templates/main-bim';
-import { getMainCloud } from '../templates/main-cloud';
-import { getMainTest } from '../templates/main-test';
-import { getMainCloudTest } from '../templates/main-cloud-test';
-import { getViteConfig } from '../templates/vite-config';
-import { getPackageJson } from '../templates/package-json';
-import { getContextMdBim, getContextMdDefault, getContextMdCloud, getContextMdTest, getContextMdCloudTest } from '../templates/context-md';
-import { getTsconfig } from '../templates/tsconfig';
-import { writeLocalConfig } from '../lib/config';
 
 const TEMPLATES = ['default', 'bim', 'cloud', 'test', 'cloud-test'] as const;
 type Template = (typeof TEMPLATES)[number];
 
-function getMainSource(template: Template): string {
-  switch (template) {
-    case 'bim':
-      return getMainBim();
-    case 'cloud':
-      return getMainCloud();
-    case 'test':
-      return getMainTest();
-    case 'cloud-test':
-      return getMainCloudTest();
-    default:
-      return getMainTs();
+/** Read the library version from package.json so templates stay in sync. */
+const libVersion: string = (() => {
+  try {
+    const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
+    return pkg.version || '0.0.0';
+  } catch {
+    return '0.0.0';
   }
-}
+})();
 
-function getContextMd(template: Template): string {
-  switch (template) {
-    case 'bim':
-      return getContextMdBim();
-    case 'cloud':
-      return getContextMdCloud();
-    case 'test':
-      return getContextMdTest();
-    case 'cloud-test':
-      return getContextMdCloudTest();
-    default:
-      return getContextMdDefault();
-  }
-}
+const templatesDir = join(__dirname, 'templates');
 
 export const createCommand = new Command('create')
   .argument('<project-name>', 'Name of the project to create (use "." for current directory)')
@@ -83,28 +54,31 @@ export const createCommand = new Command('create')
     }
     mkdirSync(join(targetDir, 'src'), { recursive: true });
 
-    // Cloud components don't need index.html
+    // ── Shared files ─────────────────────────────────────────────
+    const sharedDir = join(templatesDir, 'shared');
+    const sharedVariantDir = join(sharedDir, isCloud ? 'cloud' : 'app');
+    copyFileSync(join(sharedDir, '_gitignore'), join(targetDir, '.gitignore'));
+    copyFileSync(join(sharedVariantDir, 'tsconfig.json'), join(targetDir, 'tsconfig.json'));
+    copyFileSync(join(sharedVariantDir, 'vite.config.js'), join(targetDir, 'vite.config.js'));
     if (!isCloud) {
-      writeFileSync(join(targetDir, 'index.html'), getIndexHtml());
+      copyFileSync(join(sharedVariantDir, 'index.html'), join(targetDir, 'index.html'));
     }
 
-    writeFileSync(join(targetDir, 'src', 'main.ts'), getMainSource(template));
-    writeFileSync(join(targetDir, 'vite.config.js'), getViteConfig(template));
-    writeFileSync(join(targetDir, 'package.json'), getPackageJson(packageName, template));
-    writeFileSync(
-      join(targetDir, '.gitignore'),
-      'node_modules\ndist\n*.zip\n.thatopen\n',
-    );
-    writeFileSync(join(targetDir, 'tsconfig.json'), getTsconfig(template));
-    writeFileSync(join(targetDir, 'CONTEXT.md'), getContextMd(template));
+    // ── Template-specific files ───────────────────────────────────
+    const templateDir = join(templatesDir, template);
+    cpSync(templateDir, targetDir, { recursive: true });
 
-    // Write itemType marker for cloud projects so publish/run know the project type
+    // Cloud: rename _thatopen → .thatopen
     if (isCloud) {
-      writeLocalConfig(
-        { accessToken: '', apiUrl: '', itemType: 'COMPONENT' },
-        targetDir,
-      );
+      renameSync(join(targetDir, '_thatopen'), join(targetDir, '.thatopen'));
     }
+
+    // ── Replace placeholders in package.json ─────────────────────
+    const pkgPath = join(targetDir, 'package.json');
+    const pkg = readFileSync(pkgPath, 'utf-8')
+      .replace(/\{\{PROJECT_NAME\}\}/g, packageName)
+      .replace(/\{\{VERSION\}\}/g, libVersion);
+    writeFileSync(pkgPath, pkg);
 
     // Install dependencies automatically
     console.log('');
