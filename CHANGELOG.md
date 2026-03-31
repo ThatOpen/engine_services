@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.13.1
+
+### Patch Changes
+
+- 09341b5: fix: update default login API URL
+
 ## 0.13.0
 
 ### Minor Changes
