@@ -10,7 +10,28 @@ import { localServerCommand } from './commands/local-server';
 import { createTestsCommand } from './commands/create-tests';
 import { serveTestsCommand } from './commands/serve-tests';
 
-const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
+const pkg = JSON.parse(
+  readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'),
+);
+
+let updateMessage: string | undefined;
+
+fetch('https://registry.npmjs.org/thatopen-services/latest', {
+  signal: AbortSignal.timeout(3000),
+})
+  .then((res) => res.ok && res.json())
+  .then((data) => {
+    if (data?.version && data.version !== pkg.version) {
+      updateMessage =
+        `\n  ⚠ Update available: ${pkg.version} → ${data.version}` +
+        `\n  Run "npm install -g thatopen-services@latest" to update.\n`;
+    }
+  })
+  .catch(() => {});
+
+process.on('exit', () => {
+  if (updateMessage) console.log(updateMessage);
+});
 
 const program = new Command();
 
