@@ -27,6 +27,23 @@ declare global {
   }
 }
 
+/** Scope by which a permission was granted (or `'none'` if denied). */
+export type PermissionScope = 'global' | 'project' | 'entity' | 'none';
+
+/** Result of a single permission check. */
+export interface PermissionCheckResult {
+  hasPermission: boolean;
+  scope: PermissionScope;
+}
+
+/** One entry in a batch permission check. */
+export interface PermissionCheckEntry {
+  resourceType: string;
+  action: string;
+  resourceId?: string;
+  projectId?: string;
+}
+
 const FOLDER_PATH = 'item/folder';
 const ITEM_PATH = 'item';
 const PROCESS_PATH = 'processor';
@@ -909,14 +926,21 @@ export class EngineServicesClient {
 
   /**
    * Triggers server-side execution of a cloud component.
+   *
+   * Pass `projectId` in `executionParams` when running the component in the
+   * context of a specific project. The backend validates that the component
+   * is linked to that project AND that the user has execute permission
+   * there; a foreign `projectId` is rejected with 403. Omit `projectId` for
+   * personal executions (ownership path).
+   *
    * @param componentId - The component's unique identifier.
-   * @param executionParams - Arbitrary parameters passed to the component's `main()` function.
+   * @param executionParams - Arbitrary parameters passed to the component's `main()` function. Include `projectId` to scope the execution.
    * @param versionTag - Optional version to execute (defaults to latest).
    * @returns An object containing the `executionId` to track progress.
    */
   async executeComponent(
     componentId: string,
-    executionParams: object,
+    executionParams: { projectId?: string; [key: string]: unknown },
     versionTag?: string,
   ) {
     if (this.localServerUrl) {
@@ -965,22 +989,34 @@ export class EngineServicesClient {
 
   /**
    * Lists all executions for a given component.
+   *
+   * When `projectId` is supplied, the backend scopes the query to that
+   * project — returning only executions launched in that context AND
+   * enforcing that the caller has access to the component there. Without
+   * `projectId`, the caller's personal executions for the component are
+   * returned.
+   *
    * @param componentId - The component's unique identifier.
+   * @param projectId - Optional project scope.
    * @returns Array of execution entities.
    */
-  async listExecutions(componentId: string) {
+  async listExecutions(componentId: string, projectId?: string) {
     if (this.localServerUrl) {
-      const url = `${this.localServerUrl}/api/${PROCESS_PATH}/${componentId}/progress`;
+      const qs = projectId ? `?projectId=${encodeURIComponent(projectId)}` : '';
+      const url = `${this.localServerUrl}/api/${PROCESS_PATH}/${componentId}/progress${qs}`;
       const response = await fetch(url);
       if (!response.ok) {
         const text = await response.text().catch(() => '');
-        throw new Error(`Local server request failed: ${response.status} - ${text}`);
+        throw new Error(
+          `Local server request failed: ${response.status} - ${text}`,
+        );
       }
       return (await response.json()) as ExecutionEntity[];
     }
     return await this.#requestApi<ExecutionEntity[]>(
       'GET',
       `${PROCESS_PATH}/${componentId}/progress`,
+      { query: { ...(projectId && { projectId }) } },
     );
   }
 
@@ -1226,24 +1262,100 @@ export class EngineServicesClient {
     );
   }
 
+  /**
+   * Lists files belonging to a project. Respects per-entity permission
+   * overrides (role-level `resourcePermissions` DENY/ALLOW + folder
+   * descendants) — callers only see files their role grants them READ on.
+   *
+   * Contrast with {@link listFiles}, which targets the caller's personal
+   * items regardless of project context.
+   */
+  async listProjectFiles(
+    projectId: string,
+    params?: { archived?: boolean },
+  ) {
+    return await this.#requestApi<ItemWithVersions<Item>[]>(
+      'GET',
+      `${PROJECT_PATH}/${projectId}/files`,
+      { query: { archived: params?.archived } },
+    );
+  }
+
+  /**
+   * Lists folders belonging to a project. Applies per-entity permission
+   * filtering (role-level `resourcePermissions` DENY/ALLOW + folder
+   * descendants).
+   */
+  async listProjectFolders(
+    projectId: string,
+    params?: { archived?: boolean },
+  ) {
+    return await this.#requestApi<ItemFolder[]>(
+      'GET',
+      `${PROJECT_PATH}/${projectId}/folders`,
+      { query: { archived: params?.archived } },
+    );
+  }
+
+  /**
+   * Lists apps linked to a project via `project.apps`. Requires APP:READ in
+   * the project.
+   */
+  async listProjectApps(projectId: string) {
+    return await this.#requestApi<AppItem[]>(
+      'GET',
+      `${PROJECT_PATH}/${projectId}/apps`,
+    );
+  }
+
+  /**
+   * Lists components linked to a project via `project.components`. Requires
+   * EVENTS:READ in the project.
+   */
+  async listProjectComponents(projectId: string) {
+    return await this.#requestApi<ItemWithVersions<ComponentItem>[]>(
+      'GET',
+      `${PROJECT_PATH}/${projectId}/components`,
+    );
+  }
+
   // ─── Permissions ─────────────────────────────────────────────────
 
   /**
    * Checks whether the current token has a specific permission within a project.
+   * Returns both `hasPermission` and the `scope` by which it was granted
+   * (`global` for admin/owner, `project` for a role broad grant, `entity`
+   * for a per-entity override, `none` for denial).
    * @param params - Resource ID, resource type, action, and project ID.
-   * @returns An object with `hasPermission: boolean`.
    */
   async checkPermission(params: {
-    resourceId: string;
+    resourceId?: string;
     resourceType: string;
     action: string;
-    projectId: string;
+    projectId?: string;
   }) {
-    return await this.#requestApi<{ hasPermission: boolean }>(
+    return await this.#requestApi<PermissionCheckResult>(
       'GET',
       `${PROJECT_PATH}/permissions/check`,
-      { query: params },
+      { query: params as Record<string, string | undefined> },
     );
+  }
+
+  /**
+   * Batch variant of {@link checkPermission}. Evaluates multiple checks in
+   * a single round-trip; results come back in the same order as `checks`.
+   *
+   * @param checks - A list of permission check specs.
+   * @returns Parallel list of results (same length and order as `checks`).
+   */
+  async checkPermissionBatch(checks: PermissionCheckEntry[]) {
+    const response = await this.#requestApi<{
+      results: PermissionCheckResult[];
+    }>('POST', `${PROJECT_PATH}/permissions/check/batch`, {
+      body: JSON.stringify({ checks }),
+      contentType: 'application/json',
+    });
+    return response.results;
   }
 
   // ─── Private Helpers ─────────────────────────────────────────────

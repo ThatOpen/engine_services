@@ -45,6 +45,8 @@ npm run build:cli      # CLI only
 ### Testing
 
 ```bash
+npm run test                      # Run vitest unit tests (HTTP client contract)
+npm run test:watch                # Vitest watch mode
 npm run test:ui                   # Interactive browser test page
 npm run test:cli-build-app        # Scaffold + build a test app
 npm run test:cli-build-component  # Scaffold + build a test cloud component
@@ -52,6 +54,35 @@ npm run test:cli-run-component    # Run the test cloud component locally
 npm run test:cli-build-tests      # Build CLI + scaffold test app & test component into temp/
 npm run test:cli-serve-tests      # Serve the test app and test component's local server in parallel
 ```
+
+## Permissions contract (backend coupling)
+
+The platform API enforces **project-scoped permission checks**: whenever a
+request carries a `projectId` (URL param, query, or body), the backend
+rejects the call if the resource does not belong to that project or the
+caller lacks permission there — regardless of whether the caller has access
+to the same resource in a different project.
+
+Relevant client methods:
+
+- `executeComponent(componentId, executionParams, versionTag?)`: include
+  `projectId` in `executionParams` to scope the execution. The backend
+  validates that the component is linked to that project. Without a
+  `projectId`, the execution runs in the user's personal/ownership scope.
+- `listExecutions(componentId, projectId?)`: pass `projectId` to filter
+  executions to that project's context.
+- `checkPermission({ resourceType, action, resourceId?, projectId? })`:
+  returns `{ hasPermission, scope }`. `scope` is `'global' | 'project' |
+  'entity' | 'none'` — `global` for admin/owner bypass, `project` for a
+  role broad grant, `entity` for a per-entity override, `none` for denied.
+- `checkPermissionBatch(checks)`: evaluates a list of checks in one
+  round-trip. Useful for hydrating action visibility for many rows without
+  N+1 calls.
+
+Per-entity permission overrides (`ResourcePermission.removePermission`,
+`ResourcePermission.appliesToDescendants`) are applied automatically on the
+server side when listing project files/folders — no client change needed.
+
 
 ### Publishing to npm
 
