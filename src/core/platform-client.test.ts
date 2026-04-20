@@ -7,6 +7,7 @@ import {
   vi,
   type Mock,
 } from 'vitest';
+import { EngineServicesClient } from './client';
 import { PlatformClient } from './platform-client';
 
 const API = 'https://api.example.com';
@@ -27,7 +28,7 @@ function parseUrl(url: string): { pathname: string; params: URLSearchParams } {
   return { pathname: u.pathname, params: u.searchParams };
 }
 
-describe('PlatformClient — JWT-focused client', () => {
+describe('PlatformClient — bearer-configured EngineServicesClient', () => {
   let fetchMock: Mock;
 
   beforeEach(() => {
@@ -39,120 +40,48 @@ describe('PlatformClient — JWT-focused client', () => {
     vi.restoreAllMocks();
   });
 
-  describe('auth mode — always bearer', () => {
-    it('sends Authorization: Bearer and omits accessToken query param', async () => {
-      fetchMock.mockResolvedValue(okResponse([]));
-      const client = new PlatformClient(JWT, API);
-      await client.listFiles();
-      const call = fetchMock.mock.calls[0];
-      const url = call[0] as string;
-      const init = call[1] as RequestInit;
-      const { params } = parseUrl(url);
-      expect(params.get('accessToken')).toBeNull();
-      expect((init.headers as Record<string, string>).Authorization).toBe(
-        `Bearer ${JWT}`,
-      );
-    });
+  it('extends EngineServicesClient — full method surface is inherited', () => {
+    const client = new PlatformClient(JWT, API);
+    expect(client).toBeInstanceOf(EngineServicesClient);
+    // Methods that only exist on the parent must be callable on PlatformClient.
+    expect(typeof client.executeComponent).toBe('function');
+    expect(typeof client.onExecutionProgress).toBe('function');
+    expect(typeof client.listFiles).toBe('function');
+    expect(typeof client.checkPermission).toBe('function');
   });
 
-  describe('project-scoped listings', () => {
-    it('listFiles({ projectId }) hits /item with projectId query', async () => {
-      fetchMock.mockResolvedValue(okResponse([]));
-      const client = new PlatformClient(JWT, API);
-      await client.listFiles({ projectId: 'proj-1', archived: true });
-      const { pathname, params } = parseUrl(
-        fetchMock.mock.calls[0][0] as string,
-      );
-      expect(pathname).toBe('/api/item');
-      expect(params.get('itemType')).toBe('FILE');
-      expect(params.get('projectId')).toBe('proj-1');
-      expect(params.get('archived')).toBe('true');
-    });
-
-    it('listFolders({ projectId }) hits /item/folder with projectId query', async () => {
-      fetchMock.mockResolvedValue(okResponse([]));
-      const client = new PlatformClient(JWT, API);
-      await client.listFolders({ projectId: 'proj-1' });
-      const { pathname, params } = parseUrl(
-        fetchMock.mock.calls[0][0] as string,
-      );
-      expect(pathname).toBe('/api/item/folder');
-      expect(params.get('projectId')).toBe('proj-1');
-    });
-
-    it('listApps({ projectId }) hits /item?itemType=APP with projectId', async () => {
-      fetchMock.mockResolvedValue(okResponse([]));
-      const client = new PlatformClient(JWT, API);
-      await client.listApps({ projectId: 'proj-1' });
-      const { pathname, params } = parseUrl(
-        fetchMock.mock.calls[0][0] as string,
-      );
-      expect(pathname).toBe('/api/item');
-      expect(params.get('itemType')).toBe('APP');
-      expect(params.get('projectId')).toBe('proj-1');
-    });
-
-    it('listComponents({ projectId }) hits /item?itemType=TOOL with projectId', async () => {
-      fetchMock.mockResolvedValue(okResponse([]));
-      const client = new PlatformClient(JWT, API);
-      await client.listComponents({ projectId: 'proj-1' });
-      const { pathname, params } = parseUrl(
-        fetchMock.mock.calls[0][0] as string,
-      );
-      expect(pathname).toBe('/api/item');
-      expect(params.get('itemType')).toBe('TOOL');
-      expect(params.get('projectId')).toBe('proj-1');
-    });
+  it('always authenticates with Bearer regardless of props', async () => {
+    fetchMock.mockResolvedValue(okResponse([]));
+    const client = new PlatformClient(JWT, API, { retries: 2 });
+    await client.listFiles();
+    const call = fetchMock.mock.calls[0];
+    const url = call[0] as string;
+    const init = call[1] as RequestInit;
+    const { params } = parseUrl(url);
+    expect(params.get('accessToken')).toBeNull();
+    expect((init.headers as Record<string, string>).Authorization).toBe(
+      `Bearer ${JWT}`,
+    );
   });
 
-  describe('permissions', () => {
-    it('checkPermission returns { hasPermission, scope }', async () => {
-      fetchMock.mockResolvedValue(
-        okResponse({ hasPermission: true, scope: 'project' }),
-      );
-      const client = new PlatformClient(JWT, API);
-      const result = await client.checkPermission({
-        resourceType: 'APP',
-        action: 'READ',
-        projectId: 'proj-1',
-      });
-      expect(result).toEqual({ hasPermission: true, scope: 'project' });
-    });
-
-    it('checkPermissionBatch returns an array of results', async () => {
-      fetchMock.mockResolvedValue(
-        okResponse({
-          results: [
-            { hasPermission: true, scope: 'project' },
-            { hasPermission: false, scope: 'none' },
-          ],
-        }),
-      );
-      const client = new PlatformClient(JWT, API);
-      const results = await client.checkPermissionBatch([
-        { resourceType: 'APP', action: 'READ', projectId: 'proj-1' },
-        { resourceType: 'APP', action: 'DELETE', projectId: 'proj-1' },
-      ]);
-      expect(results).toHaveLength(2);
-    });
+  it('forwards projectId on project-scoped listings', async () => {
+    fetchMock.mockResolvedValue(okResponse([]));
+    const client = new PlatformClient(JWT, API);
+    await client.listFiles({ projectId: 'proj-1' });
+    const { pathname, params } = parseUrl(fetchMock.mock.calls[0][0] as string);
+    expect(pathname).toBe('/api/item');
+    expect(params.get('itemType')).toBe('FILE');
+    expect(params.get('projectId')).toBe('proj-1');
   });
 
-  describe('surface — does NOT expose component-runtime methods', () => {
-    it('has no executeComponent, onExecutionProgress, localServerUrl, setBuiltInGlobals', () => {
-      const client = new PlatformClient(JWT, API) as unknown as Record<
-        string,
-        unknown
-      >;
-      // Any of these on the PlatformClient surface would be a regression.
-      expect(client.executeComponent).toBeUndefined();
-      expect(client.onExecutionProgress).toBeUndefined();
-      expect(client.localServerUrl).toBeUndefined();
-      expect(client.setBuiltInGlobals).toBeUndefined();
-      expect(client.getBuiltInComponent).toBeUndefined();
-      expect(client.initBuiltInComponent).toBeUndefined();
-      expect(client.abortExecution).toBeUndefined();
-      expect(client.listExecutions).toBeUndefined();
-      expect(client.getExecution).toBeUndefined();
-    });
+  it('TypeScript: constructor has no API-token / useBearer escape hatches', () => {
+    // The constructor only takes (bearerToken, apiUrl, props?). `useBearer`
+    // is omitted from the props type — callers can't turn bearer off.
+    // This test documents the contract; if the type widens, it breaks.
+    type Ctor = ConstructorParameters<typeof PlatformClient>;
+    type Props = Ctor[2];
+    // @ts-expect-error — useBearer is not assignable on PlatformClient props.
+    const _badProps: Props = { useBearer: false };
+    void _badProps;
   });
 });

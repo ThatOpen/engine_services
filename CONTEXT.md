@@ -68,15 +68,13 @@ low-level HTTP surface. This is what you get via
 `EngineServicesClient.fromPlatformContext()` inside a component bundle.
 
 ### `PlatformClient`
-**For apps, frontends, and general user code.** Always uses Bearer JWT auth.
-Exposes a narrower surface: CRUD for files/folders/apps/components,
-project-scoped listings, `checkPermission`/`checkPermissionBatch`, icons,
-project getters. Does **not** expose `executeComponent`, WebSocket progress,
-built-in component helpers, or the local-execution-server plumbing.
+**For apps, frontends, and any caller using a user JWT.** Extends
+`EngineServicesClient` — the full method surface is inherited. The only
+difference is the constructor: it takes the bearer token directly and
+always wires `useBearer: true` internally.
 
-Composition, not duplication: `PlatformClient` wraps an
-`EngineServicesClient` internally with `useBearer: true`, so bug fixes in
-the HTTP layer automatically propagate to both.
+Switching from API-token auth to JWT auth is the only reason to use
+`PlatformClient`; the method vocabulary is identical.
 
 Choose by audience:
 - Component code → `EngineServicesClient` (or `fromPlatformContext()`).
