@@ -59,9 +59,9 @@ describe('EngineServicesClient — HTTP contract', () => {
 
   describe('auth mode', () => {
     it('access-token mode puts token in query string', async () => {
-      fetchMock.mockResolvedValue(okResponse({ results: [] }));
+      fetchMock.mockResolvedValue(okResponse([]));
       const client = new EngineServicesClient(TOKEN, API);
-      await client.checkPermissionBatch([]);
+      await client.listFiles();
       const { url, init } = getCall(fetchMock);
       const { params } = parseUrl(url);
       expect(params.get('accessToken')).toBe(TOKEN);
@@ -71,9 +71,9 @@ describe('EngineServicesClient — HTTP contract', () => {
     });
 
     it('bearer mode sets Authorization header and omits accessToken query param', async () => {
-      fetchMock.mockResolvedValue(okResponse({ results: [] }));
+      fetchMock.mockResolvedValue(okResponse([]));
       const client = new EngineServicesClient(TOKEN, API, { useBearer: true });
-      await client.checkPermissionBatch([]);
+      await client.listFiles();
       const { url, init } = getCall(fetchMock);
       const { params } = parseUrl(url);
       expect(params.get('accessToken')).toBeNull();
@@ -134,63 +134,8 @@ describe('EngineServicesClient — HTTP contract', () => {
     });
   });
 
-  describe('checkPermission', () => {
-    it('GETs /project/permissions/check with query params', async () => {
-      fetchMock.mockResolvedValue(
-        okResponse({ hasPermission: true, scope: 'project' }),
-      );
-      const client = new EngineServicesClient(TOKEN, API);
-      const result = await client.checkPermission({
-        resourceType: 'APP',
-        action: 'READ',
-        projectId: 'proj-1',
-      });
-      expect(result).toEqual({ hasPermission: true, scope: 'project' });
-      const { url, init } = getCall(fetchMock);
-      const { pathname, params } = parseUrl(url);
-      expect(pathname).toBe('/api/project/permissions/check');
-      expect(init.method).toBe('GET');
-      expect(params.get('resourceType')).toBe('APP');
-      expect(params.get('action')).toBe('READ');
-      expect(params.get('projectId')).toBe('proj-1');
-    });
-  });
-
-  describe('checkPermissionBatch', () => {
-    it('POSTs to /project/permissions/check/batch and returns the results array', async () => {
-      fetchMock.mockResolvedValue(
-        okResponse({
-          results: [
-            { hasPermission: true, scope: 'project' },
-            { hasPermission: false, scope: 'none' },
-          ],
-        }),
-      );
-      const client = new EngineServicesClient(TOKEN, API);
-      const checks = [
-        {
-          resourceType: 'APP',
-          action: 'READ',
-          projectId: 'proj-1',
-        },
-        {
-          resourceType: 'APP',
-          action: 'DELETE',
-          projectId: 'proj-1',
-        },
-      ];
-      const results = await client.checkPermissionBatch(checks);
-      expect(results).toHaveLength(2);
-      expect(results[0]).toEqual({ hasPermission: true, scope: 'project' });
-      expect(results[1]).toEqual({ hasPermission: false, scope: 'none' });
-
-      const { url, init } = getCall(fetchMock);
-      const { pathname } = parseUrl(url);
-      expect(pathname).toBe('/api/project/permissions/check/batch');
-      expect(init.method).toBe('POST');
-      expect(init.body).toBe(JSON.stringify({ checks }));
-    });
-  });
+  // `checkPermission` and `checkPermissionBatch` live on `PlatformClient`
+  // (JWT-only routes) — their contract tests are in `platform-client.test.ts`.
 
   describe('project-scoped list methods — via projectId query on /item and /item/folder', () => {
     it('listFiles({ projectId }) forwards projectId on /item', async () => {

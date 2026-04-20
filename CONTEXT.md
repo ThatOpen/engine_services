@@ -69,15 +69,32 @@ low-level HTTP surface. This is what you get via
 
 ### `PlatformClient`
 **For apps, frontends, and any caller using a user JWT.** Extends
-`EngineServicesClient` — the full method surface is inherited. The only
-difference is the constructor: it takes the bearer token directly and
-always wires `useBearer: true` internally.
+`EngineServicesClient`; the API-token-compatible surface is inherited and
+the constructor forces `useBearer: true`. On top, it owns the JWT-only
+routes — `getProject`, `getProjectData`, `checkPermission`,
+`checkPermissionBatch` — which hit `ProjectController` in the backend
+(guarded by JWT) and are not reachable with an access token.
 
-Switching from API-token auth to JWT auth is the only reason to use
-`PlatformClient`; the method vocabulary is identical.
+The constructor accepts either a static JWT or a provider function
+(sync or async) that returns the current JWT. The provider is called on
+every request, so Auth0's `getAccessTokenSilently()` and similar
+refreshing sources Just Work:
+
+```ts
+import { PlatformClient } from 'thatopen-services';
+const client = new PlatformClient(
+  () => auth0.getAccessTokenSilently(),
+  'https://api.thatopen.com',
+);
+await client.getProjectData(projectId);
+```
+
+`PlatformClient.fromPlatformContext()` is available for apps running inside
+the platform iframe — it pulls the JWT from
+`window.__THATOPEN_CONTEXT__` and returns a ready-to-use client.
 
 Choose by audience:
-- Component code → `EngineServicesClient` (or `fromPlatformContext()`).
+- Component code → `EngineServicesClient` (or `EngineServicesClient.fromPlatformContext()`).
 - App / FE / integration with a user JWT → `PlatformClient`.
 
 ## Permissions contract (backend coupling)

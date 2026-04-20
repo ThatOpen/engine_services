@@ -17,7 +17,6 @@ import {
 } from '../types/items';
 import { CreateItemResponse, UpdateItemResponse } from '../types/response';
 import { CreateHiddenItemResult, HiddenFileEntity } from '../types/files';
-import { Project, ProjectData } from '../types/projects';
 import { ThatOpenContext } from '../types/context';
 
 declare global {
@@ -27,27 +26,9 @@ declare global {
   }
 }
 
-/** Scope by which a permission was granted (or `'none'` if denied). */
-export type PermissionScope = 'global' | 'project' | 'entity' | 'none';
-
-/** Result of a single permission check. */
-export interface PermissionCheckResult {
-  hasPermission: boolean;
-  scope: PermissionScope;
-}
-
-/** One entry in a batch permission check. */
-export interface PermissionCheckEntry {
-  resourceType: string;
-  action: string;
-  resourceId?: string;
-  projectId?: string;
-}
-
 const FOLDER_PATH = 'item/folder';
 const ITEM_PATH = 'item';
 const PROCESS_PATH = 'processor';
-const PROJECT_PATH = 'project';
 const HIDDEN_PATH = 'hidden';
 const ITEM_TYPE_FILE = 'FILE';
 const ITEM_TYPE_COMPONENT = 'TOOL';
@@ -301,6 +282,19 @@ export class EngineServicesClient {
     return `${this.apiUrl}/${path}`;
   }
 
+  /**
+   * Protected extension point for subclasses that need dynamic tokens
+   * (e.g. `PlatformClient` with an auth provider callback). The default
+   * returns the static token captured at construction time.
+   *
+   * When a subclass overrides this to call an async refresh function,
+   * the new token is picked up on every request — expired tokens no
+   * longer stick around.
+   */
+  protected async resolveAccessToken(): Promise<string> {
+    return this.accessToken;
+  }
+
   async #requestApi<T = object>(
     method: string,
     path: string,
@@ -318,10 +312,11 @@ export class EngineServicesClient {
     const url = this.#buildUrl(path);
 
     const cleanQuery = this.#cleanData(query);
+    const token = await this.resolveAccessToken();
 
     const params = {
       ...cleanQuery,
-      ...(this.useBearer ? {} : { accessToken: this.accessToken }),
+      ...(this.useBearer ? {} : { accessToken: token }),
     };
 
     try {
@@ -332,7 +327,7 @@ export class EngineServicesClient {
           headers: {
             Accept: 'application/json',
             ...(contentType && { 'Content-Type': contentType }),
-            ...(this.useBearer && { Authorization: `Bearer ${this.accessToken}` }),
+            ...(this.useBearer && { Authorization: `Bearer ${token}` }),
           },
           ...(body && { body }),
         },
@@ -365,19 +360,42 @@ export class EngineServicesClient {
     }
   }
 
+  /**
+   * Protected extension hook for subclasses (e.g. `PlatformClient`) that
+   * need to add HTTP methods against additional backend routes. Delegates
+   * to the private `#requestApi` implementation so retry / auth / query-
+   * cleaning logic is applied identically.
+   */
+  protected async request<T = object>(
+    method: string,
+    path: string,
+    requestData?: {
+      body?: BodyInit;
+      query?: object;
+      contentType?:
+        | 'application/json'
+        | 'multipart/form-data'
+        | 'application/x-www-form-urlencoded';
+      retries?: number;
+    },
+  ): Promise<T> {
+    return this.#requestApi<T>(method, path, requestData);
+  }
+
   async #requestFile(path: string, requestData?: { query?: object }) {
     const { query } = requestData || {};
     const url = this.#buildUrl(path);
+    const token = await this.resolveAccessToken();
     const params = {
       ...query,
-      ...(this.useBearer ? {} : { accessToken: this.accessToken }),
+      ...(this.useBearer ? {} : { accessToken: token }),
     };
     const response = await fetch(
       url + '?' + new URLSearchParams(params).toString(),
       {
         method: 'GET',
         ...(this.useBearer && {
-          headers: { Authorization: `Bearer ${this.accessToken}` },
+          headers: { Authorization: `Bearer ${token}` },
         }),
       },
     );
@@ -1262,78 +1280,17 @@ export class EngineServicesClient {
     );
   }
 
-  // ─── Projects ────────────────────────────────────────────────────
-
-  /**
-   * Gets a project by ID. Requires JWT auth or a future PublicAuth endpoint.
-   * @param projectId - The project's unique identifier.
-   * @returns The project entity.
-   */
-  async getProject(projectId: string) {
-    return await this.#requestApi<Project>(
-      'GET',
-      `${PROJECT_PATH}/${projectId}`,
-    );
-  }
-
-  /**
-   * Gets the full project data, including users, roles, files, and folders.
-   * User data is stripped of sensitive fields server-side.
-   * @param projectId - The project's unique identifier.
-   * @returns The aggregated project data DTO.
-   */
-  async getProjectData(projectId: string) {
-    return await this.#requestApi<ProjectData>(
-      'GET',
-      `${PROJECT_PATH}/${projectId}/data`,
-    );
-  }
-
   // Project-scoped listings happen via the main list methods — e.g.
   // `listFiles({ projectId })`, `listFolders({ projectId })`,
-  // `listApps({ projectId })`, `listComponents({ projectId })`. Those
-  // call `GET /item?projectId=...` / `/item/folder?projectId=...` which
-  // work with both API tokens and Bearer JWTs and apply per-entity
-  // permission filtering on the server.
-
-  // ─── Permissions ─────────────────────────────────────────────────
-
-  /**
-   * Checks whether the current token has a specific permission within a project.
-   * Returns both `hasPermission` and the `scope` by which it was granted
-   * (`global` for admin/owner, `project` for a role broad grant, `entity`
-   * for a per-entity override, `none` for denial).
-   * @param params - Resource ID, resource type, action, and project ID.
-   */
-  async checkPermission(params: {
-    resourceId?: string;
-    resourceType: string;
-    action: string;
-    projectId?: string;
-  }) {
-    return await this.#requestApi<PermissionCheckResult>(
-      'GET',
-      `${PROJECT_PATH}/permissions/check`,
-      { query: params as Record<string, string | undefined> },
-    );
-  }
-
-  /**
-   * Batch variant of {@link checkPermission}. Evaluates multiple checks in
-   * a single round-trip; results come back in the same order as `checks`.
-   *
-   * @param checks - A list of permission check specs.
-   * @returns Parallel list of results (same length and order as `checks`).
-   */
-  async checkPermissionBatch(checks: PermissionCheckEntry[]) {
-    const response = await this.#requestApi<{
-      results: PermissionCheckResult[];
-    }>('POST', `${PROJECT_PATH}/permissions/check/batch`, {
-      body: JSON.stringify({ checks }),
-      contentType: 'application/json',
-    });
-    return response.results;
-  }
+  // `listApps({ projectId })`, `listComponents({ projectId })`. Those call
+  // `GET /item?projectId=...` / `/item/folder?projectId=...`, which accept
+  // both API tokens and JWT and apply per-entity permission filtering on
+  // the server.
+  //
+  // Methods that hit the JWT-only `/project/:id/*` and
+  // `/project/permissions/check*` routes (getProject, getProjectData,
+  // checkPermission, checkPermissionBatch) live on `PlatformClient` — they
+  // cannot be called with an access token.
 
   // ─── Private Helpers ─────────────────────────────────────────────
 
