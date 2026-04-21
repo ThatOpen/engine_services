@@ -1,4 +1,5 @@
 export * from './core/client';
+export * from './core/platform-client';
 export * from './types/items';
 export * from './types/base';
 export * from './types/execution';

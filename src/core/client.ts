@@ -17,7 +17,6 @@ import {
 } from '../types/items';
 import { CreateItemResponse, UpdateItemResponse } from '../types/response';
 import { CreateHiddenItemResult, HiddenFileEntity } from '../types/files';
-import { Project, ProjectData } from '../types/projects';
 import { ThatOpenContext } from '../types/context';
 
 declare global {
@@ -30,7 +29,6 @@ declare global {
 const FOLDER_PATH = 'item/folder';
 const ITEM_PATH = 'item';
 const PROCESS_PATH = 'processor';
-const PROJECT_PATH = 'project';
 const HIDDEN_PATH = 'hidden';
 const ITEM_TYPE_FILE = 'FILE';
 const ITEM_TYPE_COMPONENT = 'TOOL';
@@ -284,6 +282,19 @@ export class EngineServicesClient {
     return `${this.apiUrl}/${path}`;
   }
 
+  /**
+   * Protected extension point for subclasses that need dynamic tokens
+   * (e.g. `PlatformClient` with an auth provider callback). The default
+   * returns the static token captured at construction time.
+   *
+   * When a subclass overrides this to call an async refresh function,
+   * the new token is picked up on every request — expired tokens no
+   * longer stick around.
+   */
+  protected async resolveAccessToken(): Promise<string> {
+    return this.accessToken;
+  }
+
   async #requestApi<T = object>(
     method: string,
     path: string,
@@ -301,10 +312,11 @@ export class EngineServicesClient {
     const url = this.#buildUrl(path);
 
     const cleanQuery = this.#cleanData(query);
+    const token = await this.resolveAccessToken();
 
     const params = {
       ...cleanQuery,
-      ...(this.useBearer ? {} : { accessToken: this.accessToken }),
+      ...(this.useBearer ? {} : { accessToken: token }),
     };
 
     try {
@@ -315,7 +327,7 @@ export class EngineServicesClient {
           headers: {
             Accept: 'application/json',
             ...(contentType && { 'Content-Type': contentType }),
-            ...(this.useBearer && { Authorization: `Bearer ${this.accessToken}` }),
+            ...(this.useBearer && { Authorization: `Bearer ${token}` }),
           },
           ...(body && { body }),
         },
@@ -348,19 +360,42 @@ export class EngineServicesClient {
     }
   }
 
+  /**
+   * Protected extension hook for subclasses (e.g. `PlatformClient`) that
+   * need to add HTTP methods against additional backend routes. Delegates
+   * to the private `#requestApi` implementation so retry / auth / query-
+   * cleaning logic is applied identically.
+   */
+  protected async request<T = object>(
+    method: string,
+    path: string,
+    requestData?: {
+      body?: BodyInit;
+      query?: object;
+      contentType?:
+        | 'application/json'
+        | 'multipart/form-data'
+        | 'application/x-www-form-urlencoded';
+      retries?: number;
+    },
+  ): Promise<T> {
+    return this.#requestApi<T>(method, path, requestData);
+  }
+
   async #requestFile(path: string, requestData?: { query?: object }) {
     const { query } = requestData || {};
     const url = this.#buildUrl(path);
+    const token = await this.resolveAccessToken();
     const params = {
       ...query,
-      ...(this.useBearer ? {} : { accessToken: this.accessToken }),
+      ...(this.useBearer ? {} : { accessToken: token }),
     };
     const response = await fetch(
       url + '?' + new URLSearchParams(params).toString(),
       {
         method: 'GET',
         ...(this.useBearer && {
-          headers: { Authorization: `Bearer ${this.accessToken}` },
+          headers: { Authorization: `Bearer ${token}` },
         }),
       },
     );
@@ -375,8 +410,17 @@ export class EngineServicesClient {
    * @param filters - Optional filters for folder and archive status.
    * @returns Array of file items.
    */
-  async listFiles(filters?: { folderId?: string; archived?: boolean }) {
-    const { folderId, archived } = filters || {};
+  async listFiles(filters?: {
+    folderId?: string;
+    archived?: boolean;
+    /**
+     * Scope the listing to a project. Requires the token owner to have
+     * `STORAGE:READ` role in that project; otherwise the backend returns
+     * 403. Per-entity permission overrides are applied server-side.
+     */
+    projectId?: string;
+  }) {
+    const { folderId, archived, projectId } = filters || {};
     if (folderId) {
       return await this.#requestApi<Item[]>(
         'GET',
@@ -385,7 +429,11 @@ export class EngineServicesClient {
       );
     }
     return await this.#requestApi<Item[]>('GET', `${ITEM_PATH}`, {
-      query: { itemType: ITEM_TYPE_FILE, archived },
+      query: {
+        itemType: ITEM_TYPE_FILE,
+        archived,
+        ...(projectId && { projectId }),
+      },
     });
   }
 
@@ -478,10 +526,22 @@ export class EngineServicesClient {
    * @param params - Optional filters for parent folder and archive status.
    * @returns Array of folder items.
    */
-  async listFolders(params?: { parentFolderId?: string; archived?: boolean }) {
-    const { archived, parentFolderId } = params || {};
+  async listFolders(params?: {
+    parentFolderId?: string;
+    archived?: boolean;
+    /**
+     * Scope the listing to a project. Requires the token owner to have
+     * `STORAGE:READ` in that project; returns 403 otherwise.
+     */
+    projectId?: string;
+  }) {
+    const { archived, parentFolderId, projectId } = params || {};
     return await this.#requestApi<ItemFolder[]>('GET', FOLDER_PATH, {
-      query: { parentFolderId, archived },
+      query: {
+        parentFolderId,
+        archived,
+        ...(projectId && { projectId }),
+      },
     });
   }
 
@@ -569,8 +629,8 @@ export class EngineServicesClient {
    * @param params - Optional filters for folder and version inclusion.
    * @returns Array of component items.
    */
-  async listComponents(params?: GetItemsParams) {
-    const { folderId, ShowVersions } = params || {};
+  async listComponents(params?: GetItemsParams & { projectId?: string }) {
+    const { folderId, ShowVersions, projectId } = params || {};
     if (folderId) {
       return await this.#requestApi<ComponentItem[]>(
         'GET',
@@ -587,6 +647,7 @@ export class EngineServicesClient {
       query: {
         itemType: ITEM_TYPE_COMPONENT,
         ...(ShowVersions && { ShowVersions }),
+        ...(projectId && { projectId }),
       },
     });
   }
@@ -831,8 +892,8 @@ export class EngineServicesClient {
    * @param params - Optional filters for folder and version inclusion.
    * @returns Array of app items.
    */
-  async listApps(params?: GetItemsParams) {
-    const { folderId, ShowVersions } = params || {};
+  async listApps(params?: GetItemsParams & { projectId?: string }) {
+    const { folderId, ShowVersions, projectId } = params || {};
     if (folderId) {
       return await this.#requestApi<AppItem[]>(
         'GET',
@@ -849,6 +910,7 @@ export class EngineServicesClient {
       query: {
         itemType: ITEM_TYPE_APP,
         ...(ShowVersions && { ShowVersions }),
+        ...(projectId && { projectId }),
       },
     });
   }
@@ -909,14 +971,21 @@ export class EngineServicesClient {
 
   /**
    * Triggers server-side execution of a cloud component.
+   *
+   * Pass `projectId` in `executionParams` when running the component in the
+   * context of a specific project. The backend validates that the component
+   * is linked to that project AND that the user has execute permission
+   * there; a foreign `projectId` is rejected with 403. Omit `projectId` for
+   * personal executions (ownership path).
+   *
    * @param componentId - The component's unique identifier.
-   * @param executionParams - Arbitrary parameters passed to the component's `main()` function.
+   * @param executionParams - Arbitrary parameters passed to the component's `main()` function. Include `projectId` to scope the execution.
    * @param versionTag - Optional version to execute (defaults to latest).
    * @returns An object containing the `executionId` to track progress.
    */
   async executeComponent(
     componentId: string,
-    executionParams: object,
+    executionParams: { projectId?: string; [key: string]: unknown },
     versionTag?: string,
   ) {
     if (this.localServerUrl) {
@@ -965,22 +1034,34 @@ export class EngineServicesClient {
 
   /**
    * Lists all executions for a given component.
+   *
+   * When `projectId` is supplied, the backend scopes the query to that
+   * project — returning only executions launched in that context AND
+   * enforcing that the caller has access to the component there. Without
+   * `projectId`, the caller's personal executions for the component are
+   * returned.
+   *
    * @param componentId - The component's unique identifier.
+   * @param projectId - Optional project scope.
    * @returns Array of execution entities.
    */
-  async listExecutions(componentId: string) {
+  async listExecutions(componentId: string, projectId?: string) {
     if (this.localServerUrl) {
-      const url = `${this.localServerUrl}/api/${PROCESS_PATH}/${componentId}/progress`;
+      const qs = projectId ? `?projectId=${encodeURIComponent(projectId)}` : '';
+      const url = `${this.localServerUrl}/api/${PROCESS_PATH}/${componentId}/progress${qs}`;
       const response = await fetch(url);
       if (!response.ok) {
         const text = await response.text().catch(() => '');
-        throw new Error(`Local server request failed: ${response.status} - ${text}`);
+        throw new Error(
+          `Local server request failed: ${response.status} - ${text}`,
+        );
       }
       return (await response.json()) as ExecutionEntity[];
     }
     return await this.#requestApi<ExecutionEntity[]>(
       'GET',
       `${PROCESS_PATH}/${componentId}/progress`,
+      { query: { ...(projectId && { projectId }) } },
     );
   }
 
@@ -1199,52 +1280,17 @@ export class EngineServicesClient {
     );
   }
 
-  // ─── Projects ────────────────────────────────────────────────────
-
-  /**
-   * Gets a project by ID. Requires JWT auth or a future PublicAuth endpoint.
-   * @param projectId - The project's unique identifier.
-   * @returns The project entity.
-   */
-  async getProject(projectId: string) {
-    return await this.#requestApi<Project>(
-      'GET',
-      `${PROJECT_PATH}/${projectId}`,
-    );
-  }
-
-  /**
-   * Gets the full project data, including users, roles, files, and folders.
-   * User data is stripped of sensitive fields server-side.
-   * @param projectId - The project's unique identifier.
-   * @returns The aggregated project data DTO.
-   */
-  async getProjectData(projectId: string) {
-    return await this.#requestApi<ProjectData>(
-      'GET',
-      `${PROJECT_PATH}/${projectId}/data`,
-    );
-  }
-
-  // ─── Permissions ─────────────────────────────────────────────────
-
-  /**
-   * Checks whether the current token has a specific permission within a project.
-   * @param params - Resource ID, resource type, action, and project ID.
-   * @returns An object with `hasPermission: boolean`.
-   */
-  async checkPermission(params: {
-    resourceId: string;
-    resourceType: string;
-    action: string;
-    projectId: string;
-  }) {
-    return await this.#requestApi<{ hasPermission: boolean }>(
-      'GET',
-      `${PROJECT_PATH}/permissions/check`,
-      { query: params },
-    );
-  }
+  // Project-scoped listings happen via the main list methods — e.g.
+  // `listFiles({ projectId })`, `listFolders({ projectId })`,
+  // `listApps({ projectId })`, `listComponents({ projectId })`. Those call
+  // `GET /item?projectId=...` / `/item/folder?projectId=...`, which accept
+  // both API tokens and JWT and apply per-entity permission filtering on
+  // the server.
+  //
+  // Methods that hit the JWT-only `/project/:id/*` and
+  // `/project/permissions/check*` routes (getProject, getProjectData,
+  // checkPermission, checkPermissionBatch) live on `PlatformClient` — they
+  // cannot be called with an access token.
 
   // ─── Private Helpers ─────────────────────────────────────────────
 
