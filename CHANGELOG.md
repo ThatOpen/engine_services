@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.15.0
+
+### Minor Changes
+
+- 3a0b129: Send named File (with filename and mimetype) for bundle and icon uploads in the publish command.
+
 ## 0.14.0
 
 ### Minor Changes
