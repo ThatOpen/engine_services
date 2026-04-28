@@ -103,9 +103,11 @@ export const publishCommand = new Command('publish')
         process.exit(1);
       }
 
-      // Read ZIP as Blob for the client
+      // Read ZIP as a named File for the client
       const zipBuffer = readFileSync(zipPath);
-      const zipBlob = new Blob([zipBuffer]);
+      const zipFile = new File([zipBuffer], 'bundle.zip', {
+        type: 'application/zip',
+      });
 
       // Resolve icon: CLI flag > local config
       const iconPath = opts.icon || localConfig?.iconPath;
@@ -123,7 +125,7 @@ export const publishCommand = new Command('publish')
           itemId = await publishComponent(
             client,
             existingId,
-            zipBlob,
+            zipFile,
             projectName,
             versionTag,
             cwd,
@@ -132,7 +134,7 @@ export const publishCommand = new Command('publish')
           itemId = await publishApp(
             client,
             existingId,
-            zipBlob,
+            zipFile,
             projectName,
             versionTag,
             cwd,
@@ -174,7 +176,7 @@ export const publishCommand = new Command('publish')
 async function publishApp(
   client: EngineServicesClient,
   appId: string | undefined,
-  zipBlob: Blob,
+  zipFile: File,
   name: string,
   versionTag: string,
   cwd: string,
@@ -192,7 +194,7 @@ async function publishApp(
     );
     const result = await client.createVersion(
       appId,
-      zipBlob,
+      zipFile,
       versionTag,
       {}, // extraProps required by backend for APP items
     );
@@ -201,7 +203,7 @@ async function publishApp(
   } else {
     console.log(`Publishing new app "${name}" (${versionTag})...`);
     const result = await client.createApp({
-      file: zipBlob,
+      file: zipFile,
       name,
       versionTag,
     });
@@ -224,7 +226,7 @@ async function publishApp(
 async function publishComponent(
   client: EngineServicesClient,
   componentId: string | undefined,
-  zipBlob: Blob,
+  zipFile: File,
   name: string,
   versionTag: string,
   cwd: string,
@@ -247,7 +249,7 @@ async function publishComponent(
       `Publishing new version (${versionTag}) for component ${componentId}...`,
     );
     const result = await client.updateComponent(componentId, {
-      file: zipBlob,
+      file: zipFile,
       versionTag,
       componentProps,
     });
@@ -258,7 +260,7 @@ async function publishComponent(
       `Publishing new cloud component "${name}" (${versionTag})...`,
     );
     const result = await client.createComponent({
-      file: zipBlob,
+      file: zipFile,
       name,
       versionTag,
       componentProps,
@@ -279,7 +281,12 @@ async function publishComponent(
 // Icon upload helper
 // ---------------------------------------------------------------------------
 
-const ALLOWED_ICON_EXTENSIONS = ['.png', '.webp', '.ico'];
+const ICON_MIME_TYPES: Record<string, string> = {
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+};
+const ALLOWED_ICON_EXTENSIONS = Object.keys(ICON_MIME_TYPES);
 const MAX_ICON_SIZE = 512 * 1024; // 512 KB
 
 async function uploadIcon(
@@ -310,8 +317,10 @@ async function uploadIcon(
 
   console.log('Uploading icon...');
   const iconBuffer = readFileSync(resolvedPath);
-  const iconBlob = new Blob([iconBuffer]);
-  await client.uploadItemIcon(itemId, iconBlob);
+  const iconFile = new File([iconBuffer], basename(resolvedPath), {
+    type: ICON_MIME_TYPES[ext],
+  });
+  await client.uploadItemIcon(itemId, iconFile);
   console.log('Icon uploaded.');
 
   // Save icon path to local config if provided via CLI flag
