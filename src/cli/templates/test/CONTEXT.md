@@ -21,7 +21,7 @@ The test suite covers every API group in EngineServicesClient:
 | **Context & Auth** | Validates all context fields are present |
 | **Projects** | getProject, getProjectData, checkPermission |
 | **Folders** | createFolder, getFolder, listFolders, updateFolder, archiveFolder, recoverFolder, downloadFolder |
-| **Files** | createFile, getFile, listFiles, downloadFile, getFileMetadata, updateFile, archiveFile, recoverFile |
+| **Files** | createFile, getFile, listFiles, downloadFile, getFileVersionMetadata, updateFileVersionMetadata, deleteFileVersionMetadata, updateFile, archiveFile, recoverFile |
 | **Hidden Files** | createHiddenFile, getHiddenFile, getHiddenFilesByParent, downloadHiddenFile, deleteHiddenFile, deleteHiddenFilesByParent |
 | **Icons** | uploadItemIcon, getItemIcon, removeItemIcon |
 | **General Items** | updateItem, createVersion |

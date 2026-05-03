@@ -225,4 +225,71 @@ describe('EngineServicesClient — HTTP contract', () => {
       ).rejects.toThrow(/403/);
     });
   });
+
+  describe('file version metadata', () => {
+    it('GET hits /item/:id/version/:tag/metadata', async () => {
+      fetchMock.mockResolvedValue(okResponse({ k: 'v' }));
+      const client = new EngineServicesClient(TOKEN, API);
+      const result = await client.getFileVersionMetadata('file-1', 'v1');
+      const { url, init } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(pathname).toBe('/api/item/file-1/version/v1/metadata');
+      expect(init.method).toBe('GET');
+      expect(result).toEqual({ k: 'v' });
+    });
+
+    it('GET forwards withDraft when provided', async () => {
+      fetchMock.mockResolvedValue(okResponse({}));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.getFileVersionMetadata('file-1', 'draft', {
+        withDraft: true,
+      });
+      const { url } = getCall(fetchMock);
+      const { params } = parseUrl(url);
+      expect(params.get('withDraft')).toBe('true');
+    });
+
+    it('PUT sends the metadata in a JSON body', async () => {
+      fetchMock.mockResolvedValue(okResponse({ a: 'b' }));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.updateFileVersionMetadata('file-1', 'v1', { a: 'b', n: 1 });
+      const { url, init } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(pathname).toBe('/api/item/file-1/version/v1/metadata');
+      expect(init.method).toBe('PUT');
+      expect(JSON.parse(init.body as string)).toEqual({
+        metadata: { a: 'b', n: 1 },
+      });
+      expect((init.headers as Record<string, string>)['Content-Type']).toBe(
+        'application/json',
+      );
+    });
+
+    it('DELETE hits /item/:id/version/:tag/metadata with DELETE method', async () => {
+      fetchMock.mockResolvedValue(okResponse({ success: true }));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.deleteFileVersionMetadata('file-1', 'v1');
+      const { url, init } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(pathname).toBe('/api/item/file-1/version/v1/metadata');
+      expect(init.method).toBe('DELETE');
+    });
+
+    it('createFile attaches metadata to the FormData body when provided', async () => {
+      fetchMock.mockResolvedValue(okResponse({}));
+      const client = new EngineServicesClient(TOKEN, API);
+      const file = new Blob(['x']) as Blob;
+      await client.createFile({
+        file,
+        name: 'doc.ifc',
+        versionTag: 'v1',
+        metadata: { discipline: 'structural' },
+      });
+      const { init } = getCall(fetchMock);
+      const formData = init.body as FormData;
+      expect(JSON.parse(formData.get('metadata') as string)).toEqual({
+        discipline: 'structural',
+      });
+    });
+  });
 });
