@@ -1280,6 +1280,66 @@ export class EngineServicesClient {
     );
   }
 
+  /**
+   * Lists versions of an item. Pass `archived: true` to fetch only archived
+   * versions, `false` to fetch only active ones, or omit to receive both.
+   * @param itemId - The item's unique identifier.
+   * @param params - Optional `{ archived }` filter.
+   * @returns Array of versions, sorted by creation date descending.
+   */
+  async listVersions(
+    itemId: string,
+    params: { archived?: boolean } = {},
+  ): Promise<ItemVersion[]> {
+    return await this.#requestApi<ItemVersion[]>(
+      'GET',
+      `${ITEM_PATH}/${itemId}/versions`,
+      { query: params },
+    );
+  }
+
+  /**
+   * Archives a version of an item. Archived versions remain available via
+   * `listVersions({ archived: true })` and can be recovered or permanently
+   * deleted. Cleanup runs daily and removes archived versions older than the
+   * platform retention period.
+   * @param itemId - The item's unique identifier.
+   * @param versionTag - The version's tag (e.g. "v2").
+   * @returns The archived version.
+   */
+  async archiveVersion(itemId: string, versionTag: string) {
+    return await this.#requestApi<ItemVersion>(
+      'PUT',
+      `${ITEM_PATH}/${itemId}/version/${versionTag}/archive`,
+    );
+  }
+
+  /**
+   * Recovers a previously archived version, restoring it to the active list.
+   * @param itemId - The item's unique identifier.
+   * @param versionTag - The version's tag (e.g. "v2").
+   * @returns The recovered version.
+   */
+  async recoverVersion(itemId: string, versionTag: string) {
+    return await this.#requestApi<ItemVersion>(
+      'PUT',
+      `${ITEM_PATH}/${itemId}/version/${versionTag}/recover`,
+    );
+  }
+
+  /**
+   * Permanently deletes a version, including its file in object storage.
+   * The version must be archived first; otherwise the call is rejected.
+   * @param itemId - The item's unique identifier.
+   * @param versionTag - The version's tag (e.g. "v2").
+   */
+  async deleteVersion(itemId: string, versionTag: string) {
+    return await this.#requestApi<{ success: boolean }>(
+      'DELETE',
+      `${ITEM_PATH}/${itemId}/version/${versionTag}`,
+    );
+  }
+
   // Project-scoped listings happen via the main list methods — e.g.
   // `listFiles({ projectId })`, `listFolders({ projectId })`,
   // `listApps({ projectId })`, `listComponents({ projectId })`. Those call
