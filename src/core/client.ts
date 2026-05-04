@@ -1293,7 +1293,7 @@ export class EngineServicesClient {
   ): Promise<ItemVersion[]> {
     return await this.#requestApi<ItemVersion[]>(
       'GET',
-      `${ITEM_PATH}/${itemId}/versions`,
+      `${ITEM_PATH}/${encodeURIComponent(itemId)}/versions`,
       { query: params },
     );
   }
@@ -1310,7 +1310,7 @@ export class EngineServicesClient {
   async archiveVersion(itemId: string, versionTag: string) {
     return await this.#requestApi<ItemVersion>(
       'PUT',
-      `${ITEM_PATH}/${itemId}/version/${versionTag}/archive`,
+      `${ITEM_PATH}/${encodeURIComponent(itemId)}/version/${encodeURIComponent(versionTag)}/archive`,
     );
   }
 
@@ -1323,7 +1323,7 @@ export class EngineServicesClient {
   async recoverVersion(itemId: string, versionTag: string) {
     return await this.#requestApi<ItemVersion>(
       'PUT',
-      `${ITEM_PATH}/${itemId}/version/${versionTag}/recover`,
+      `${ITEM_PATH}/${encodeURIComponent(itemId)}/version/${encodeURIComponent(versionTag)}/recover`,
     );
   }
 
@@ -1336,7 +1336,7 @@ export class EngineServicesClient {
   async deleteVersion(itemId: string, versionTag: string) {
     return await this.#requestApi<{ success: boolean }>(
       'DELETE',
-      `${ITEM_PATH}/${itemId}/version/${versionTag}`,
+      `${ITEM_PATH}/${encodeURIComponent(itemId)}/version/${encodeURIComponent(versionTag)}`,
     );
   }
 

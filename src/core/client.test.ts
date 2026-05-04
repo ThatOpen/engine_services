@@ -293,5 +293,16 @@ describe('EngineServicesClient — HTTP contract', () => {
       const client = new EngineServicesClient(TOKEN, API);
       await expect(client.deleteVersion('item-1', 'v2')).rejects.toThrow(/404/);
     });
+
+    it('encodes URL-unsafe characters in itemId and versionTag', async () => {
+      fetchMock.mockResolvedValue(okResponse({ tag: 'v1?bug', archived: true }));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.archiveVersion('item/with slash', 'v1?bug');
+      const { url } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(pathname).toBe(
+        '/api/item/item%2Fwith%20slash/version/v1%3Fbug/archive',
+      );
+    });
   });
 });
