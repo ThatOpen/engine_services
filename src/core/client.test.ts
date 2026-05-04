@@ -291,5 +291,16 @@ describe('EngineServicesClient — HTTP contract', () => {
         discipline: 'structural',
       });
     });
+
+    it('encodes URL-unsafe characters in fileId and versionTag', async () => {
+      fetchMock.mockResolvedValue(okResponse({}));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.getFileVersionMetadata('file/with slash', 'v1?bug');
+      const { url } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(pathname).toBe(
+        '/api/item/file%2Fwith%20slash/version/v1%3Fbug/metadata',
+      );
+    });
   });
 });

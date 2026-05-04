@@ -518,7 +518,7 @@ export class EngineServicesClient {
     const { withDraft } = params || {};
     return await this.#requestApi<Metadata>(
       'GET',
-      `${ITEM_PATH}/${fileId}/version/${versionTag}/metadata`,
+      `${ITEM_PATH}/${encodeURIComponent(fileId)}/version/${encodeURIComponent(versionTag)}/metadata`,
       {
         query: {
           ...(withDraft && { withDraft: 'true' }),
@@ -540,7 +540,7 @@ export class EngineServicesClient {
   ) {
     return await this.#requestApi<Metadata>(
       'PUT',
-      `${ITEM_PATH}/${fileId}/version/${versionTag}/metadata`,
+      `${ITEM_PATH}/${encodeURIComponent(fileId)}/version/${encodeURIComponent(versionTag)}/metadata`,
       {
         body: JSON.stringify({ metadata }),
         contentType: 'application/json',
@@ -556,7 +556,7 @@ export class EngineServicesClient {
   async deleteFileVersionMetadata(fileId: string, versionTag: string) {
     return await this.#requestApi<{ success: boolean }>(
       'DELETE',
-      `${ITEM_PATH}/${fileId}/version/${versionTag}/metadata`,
+      `${ITEM_PATH}/${encodeURIComponent(fileId)}/version/${encodeURIComponent(versionTag)}/metadata`,
     );
   }
 
