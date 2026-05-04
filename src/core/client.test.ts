@@ -303,4 +303,84 @@ describe('EngineServicesClient — HTTP contract', () => {
       );
     });
   });
+
+  describe('version archive / recover / delete', () => {
+    it('listVersions GETs /item/:id/versions and forwards archived filter', async () => {
+      fetchMock.mockResolvedValue(okResponse([]));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.listVersions('item-1', { archived: true });
+      const { url, init } = getCall(fetchMock);
+      const { pathname, params } = parseUrl(url);
+      expect(init.method).toBe('GET');
+      expect(pathname).toBe('/api/item/item-1/versions');
+      expect(params.get('archived')).toBe('true');
+    });
+
+    it('listVersions omits archived param when not provided', async () => {
+      fetchMock.mockResolvedValue(okResponse([]));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.listVersions('item-1');
+      const { params } = parseUrl(getCall(fetchMock).url);
+      expect(params.get('archived')).toBeNull();
+    });
+
+    it('archiveVersion PUTs /item/:id/version/:tag/archive', async () => {
+      fetchMock.mockResolvedValue(okResponse({ tag: 'v2', archived: true }));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.archiveVersion('item-1', 'v2');
+      const { url, init } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(init.method).toBe('PUT');
+      expect(pathname).toBe('/api/item/item-1/version/v2/archive');
+    });
+
+    it('recoverVersion PUTs /item/:id/version/:tag/recover', async () => {
+      fetchMock.mockResolvedValue(okResponse({ tag: 'v2', archived: false }));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.recoverVersion('item-1', 'v2');
+      const { url, init } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(init.method).toBe('PUT');
+      expect(pathname).toBe('/api/item/item-1/version/v2/recover');
+    });
+
+    it('deleteVersion DELETEs /item/:id/version/:tag', async () => {
+      fetchMock.mockResolvedValue(okResponse({ success: true }));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.deleteVersion('item-1', 'v2');
+      const { url, init } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(init.method).toBe('DELETE');
+      expect(pathname).toBe('/api/item/item-1/version/v2');
+    });
+
+    it('archiveVersion in bearer mode uses Authorization header', async () => {
+      fetchMock.mockResolvedValue(okResponse({ tag: 'v2', archived: true }));
+      const client = new EngineServicesClient(TOKEN, API, { useBearer: true });
+      await client.archiveVersion('item-1', 'v2');
+      const { url, init } = getCall(fetchMock);
+      const { params } = parseUrl(url);
+      expect(params.get('accessToken')).toBeNull();
+      expect((init.headers as Record<string, string>).Authorization).toBe(
+        `Bearer ${TOKEN}`,
+      );
+    });
+
+    it('deleteVersion throws when the server responds with a non-2xx', async () => {
+      fetchMock.mockResolvedValue(errorResponse(404, 'Not Found'));
+      const client = new EngineServicesClient(TOKEN, API);
+      await expect(client.deleteVersion('item-1', 'v2')).rejects.toThrow(/404/);
+    });
+
+    it('encodes URL-unsafe characters in itemId and versionTag', async () => {
+      fetchMock.mockResolvedValue(okResponse({ tag: 'v1?bug', archived: true }));
+      const client = new EngineServicesClient(TOKEN, API);
+      await client.archiveVersion('item/with slash', 'v1?bug');
+      const { url } = getCall(fetchMock);
+      const { pathname } = parseUrl(url);
+      expect(pathname).toBe(
+        '/api/item/item%2Fwith%20slash/version/v1%3Fbug/archive',
+      );
+    });
+  });
 });
