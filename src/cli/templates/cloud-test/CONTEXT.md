@@ -15,7 +15,7 @@ server-side context. It verifies that the platform API and runtime globals work 
 |-------|-----------------|
 | **Runtime Globals** | thatOpenServices, executionParams, executionReporter, OBC, THREE, fs |
 | **Folders** | createFolder, getFolder, listFolders, updateFolder, archiveFolder, recoverFolder, downloadFolder |
-| **Files** | createFile, getFile, listFiles, downloadFile, getFileMetadata, updateFile, archiveFile, recoverFile |
+| **Files** | createFile, getFile, listFiles, downloadFile, getFileVersionMetadata, updateFileVersionMetadata, deleteFileVersionMetadata, updateFile, archiveFile, recoverFile |
 | **Hidden Files** | createHiddenFile, getHiddenFile, getHiddenFilesByParent, downloadHiddenFile, deleteHiddenFile, deleteHiddenFilesByParent |
 | **Icons** | uploadItemIcon, getItemIcon, removeItemIcon |
 | **General Items** | updateItem, createVersion |

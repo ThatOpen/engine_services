@@ -16,7 +16,11 @@ import {
   ItemWithVersions,
 } from '../types/items';
 import { CreateItemResponse, UpdateItemResponse } from '../types/response';
-import { CreateHiddenItemResult, HiddenFileEntity } from '../types/files';
+import {
+  CreateHiddenItemResult,
+  HiddenFileEntity,
+  Metadata,
+} from '../types/files';
 import { ThatOpenContext } from '../types/context';
 
 declare global {
@@ -56,8 +60,8 @@ export type CreateItemProps = {
   parentFolderId?: string;
   /** Optional project ID to associate the item with. */
   projectId?: string;
-  /** Optional key-value metadata (max 30 KB when serialized). */
-  metadata?: Record<string, string>;
+  /** Optional free-JSON metadata stored on the first version. */
+  metadata?: Metadata;
 };
 
 /** Properties for updating an existing item. Combines rename/move with optional new version upload. */
@@ -70,8 +74,8 @@ export type UpdateItemProps = {
   file?: File | Blob;
   /** Version tag for the new file version. */
   versionTag?: string;
-  /** Optional key-value metadata for the new version. */
-  metadata?: Record<string, string>;
+  /** Optional free-JSON metadata stored on the new version. */
+  metadata?: Metadata;
 };
 
 /** Properties for creating an app. Extends {@link CreateItemProps} with app-specific version props. */
@@ -449,7 +453,7 @@ export class EngineServicesClient {
 
   /**
    * Uploads a new file.
-   * @param fileData - File content, name, version tag, and optional metadata.
+   * @param fileData - File content, name, and version tag.
    * @returns The created item and its first version.
    */
   async createFile(fileData: CreateItemProps) {
@@ -500,22 +504,59 @@ export class EngineServicesClient {
   }
 
   /**
-   * Retrieves the metadata JSON associated with a file version.
-   * @param itemId - The file's unique identifier.
-   * @param params - Optional version selection parameters.
-   * @returns The metadata key-value object.
+   * Retrieves the free-JSON metadata for a specific file version.
+   * Returns `{}` when the version exists but has no metadata.
+   * @param fileId - The file's unique identifier.
+   * @param versionTag - The version tag (e.g. "v1").
+   * @param params - Optional flags such as `withDraft`.
    */
-  async getFileMetadata(itemId: string, params?: DownloadItemFileParams) {
-    const { versionTag, withDraft } = params || {};
-    return await this.#requestApi<Record<string, string>>(
+  async getFileVersionMetadata(
+    fileId: string,
+    versionTag: string,
+    params?: { withDraft?: boolean },
+  ) {
+    const { withDraft } = params || {};
+    return await this.#requestApi<Metadata>(
       'GET',
-      `${ITEM_PATH}/${itemId}/metadata`,
+      `${ITEM_PATH}/${encodeURIComponent(fileId)}/version/${encodeURIComponent(versionTag)}/metadata`,
       {
         query: {
-          ...(versionTag && { versionTag }),
-          ...(withDraft && { withDraft }),
+          ...(withDraft && { withDraft: 'true' }),
         },
       },
+    );
+  }
+
+  /**
+   * Replaces the metadata of a specific file version with the provided object.
+   * @param fileId - The file's unique identifier.
+   * @param versionTag - The version tag.
+   * @param metadata - Free-JSON object (max 200 fields, 50-char keys/values).
+   */
+  async updateFileVersionMetadata(
+    fileId: string,
+    versionTag: string,
+    metadata: Metadata,
+  ) {
+    return await this.#requestApi<Metadata>(
+      'PUT',
+      `${ITEM_PATH}/${encodeURIComponent(fileId)}/version/${encodeURIComponent(versionTag)}/metadata`,
+      {
+        body: JSON.stringify({ metadata }),
+        contentType: 'application/json',
+      },
+    );
+  }
+
+  /**
+   * Clears all metadata from a specific file version.
+   * @param fileId - The file's unique identifier.
+   * @param versionTag - The version tag.
+   */
+  async deleteFileVersionMetadata(fileId: string, versionTag: string) {
+    return await this.#requestApi<{ success: boolean }>(
+      'DELETE',
+      `${ITEM_PATH}/${encodeURIComponent(fileId)}/version/${encodeURIComponent(versionTag)}/metadata`,
     );
   }
 
@@ -1257,7 +1298,7 @@ export class EngineServicesClient {
    * @param file - The new file to upload.
    * @param versionTag - Version tag for the new version (e.g. "v2").
    * @param extraProps - Version-specific properties (required for APP/TOOL types).
-   * @param metadata - Optional key-value metadata for this version.
+   * @param metadata - Optional free-JSON metadata to store on the new version.
    * @returns The created version.
    */
   async createVersion(
@@ -1265,14 +1306,13 @@ export class EngineServicesClient {
     file: File | Blob,
     versionTag: string,
     extraProps?: object,
-    metadata?: Record<string, string>,
+    metadata?: Metadata,
   ) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('versionTag', versionTag);
     extraProps && formData.append('extraProps', JSON.stringify(extraProps));
-    metadata &&
-      formData.append('metadata', JSON.stringify(this.#cleanData(metadata)));
+    metadata && formData.append('metadata', JSON.stringify(metadata));
     return await this.#requestApi<ItemVersion>(
       'POST',
       `${ITEM_PATH}/${itemId}/version`,
@@ -1380,8 +1420,7 @@ export class EngineServicesClient {
     projectId && formData.append('projectId', projectId);
 
     extraProps && formData.append('extraProps', JSON.stringify(extraProps));
-    metadata &&
-      formData.append('metadata', JSON.stringify(this.#cleanData(metadata)));
+    metadata && formData.append('metadata', JSON.stringify(metadata));
     return await this.#requestApi<CreateItemResponse<T>>('POST', ITEM_PATH, {
       body: formData,
     });
@@ -1402,8 +1441,7 @@ export class EngineServicesClient {
       formData.append('file', file);
       versionTag && formData.append('versionTag', versionTag);
       extraProps && formData.append('extraProps', JSON.stringify(extraProps));
-      metadata &&
-        formData.append('metadata', JSON.stringify(this.#cleanData(metadata)));
+      metadata && formData.append('metadata', JSON.stringify(metadata));
       version = await this.#requestApi<ItemVersion>(
         'POST',
         `${ITEM_PATH}/${itemId}/version`,

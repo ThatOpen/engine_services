@@ -205,10 +205,30 @@ export async function main() {
     }),
   );
   fileResults.push(
-    await runTest("getFileMetadata", async () => {
+    await runTest("getFileVersionMetadata", async () => {
       assert(!!testFileId, "No file");
-      const metadata = await thatOpenServices.getFileMetadata(testFileId);
+      const metadata = await thatOpenServices.getFileVersionMetadata(
+        testFileId,
+        "v1",
+      );
       assert(typeof metadata === "object", "metadata not object");
+    }),
+  );
+  fileResults.push(
+    await runTest("updateFileVersionMetadata", async () => {
+      assert(!!testFileId, "No file");
+      const result = await thatOpenServices.updateFileVersionMetadata(
+        testFileId,
+        "v1",
+        { discipline: "structural" },
+      );
+      assert(typeof result === "object", "result not object");
+    }),
+  );
+  fileResults.push(
+    await runTest("deleteFileVersionMetadata", async () => {
+      assert(!!testFileId, "No file");
+      await thatOpenServices.deleteFileVersionMetadata(testFileId, "v1");
     }),
   );
   fileResults.push(

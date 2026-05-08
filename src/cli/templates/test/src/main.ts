@@ -443,10 +443,25 @@ async function runAllTests(resultsEl: HTMLElement, client: PlatformClient, compo
     }),
   );
   fileResults.push(
-    await runTest("getFileMetadata", async () => {
+    await runTest("getFileVersionMetadata", async () => {
       assert(!!testFileId, "No file");
-      const metadata = await client.getFileMetadata(testFileId);
+      const metadata = await client.getFileVersionMetadata(testFileId, "v1");
       assert(typeof metadata === "object", "metadata not object");
+    }),
+  );
+  fileResults.push(
+    await runTest("updateFileVersionMetadata", async () => {
+      assert(!!testFileId, "No file");
+      const result = await client.updateFileVersionMetadata(testFileId, "v1", {
+        discipline: "structural",
+      });
+      assert(typeof result === "object", "result not object");
+    }),
+  );
+  fileResults.push(
+    await runTest("deleteFileVersionMetadata", async () => {
+      assert(!!testFileId, "No file");
+      await client.deleteFileVersionMetadata(testFileId, "v1");
     }),
   );
   fileResults.push(
