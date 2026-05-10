@@ -84,6 +84,16 @@ export const localServerCommand = new Command('local-server')
           // silenced in the `serve` command. Cosmetic, no runtime impact.
           'duplicate-object-key': 'silent',
         },
+        loader: {
+          // Image asset imports inlined as data URLs — see the
+          // matching block in `serve.ts` for rationale.
+          '.svg': 'dataurl',
+          '.png': 'dataurl',
+          '.jpg': 'dataurl',
+          '.jpeg': 'dataurl',
+          '.gif': 'dataurl',
+          '.webp': 'dataurl',
+        },
         external: [
           'thatopen-services',
           '@thatopen/components',

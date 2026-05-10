@@ -68,6 +68,18 @@ export const serveCommand = new Command('serve')
         // platform app build hits two of these. Cosmetic, no runtime impact.
         'duplicate-object-key': 'silent',
       },
+      loader: {
+        // Image asset imports (`import iconUrl from "./icon.svg"`). Each is
+        // inlined as a data URL into the IIFE so the bundle stays a single
+        // self-contained file — no need for the dev server to serve loose
+        // assets alongside bundle.js.
+        '.svg': 'dataurl',
+        '.png': 'dataurl',
+        '.jpg': 'dataurl',
+        '.jpeg': 'dataurl',
+        '.gif': 'dataurl',
+        '.webp': 'dataurl',
+      },
       plugins: [
         {
           name: 'reload',
