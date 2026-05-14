@@ -1,5 +1,11 @@
 # thatopen-services
 
+## 0.18.0
+
+### Minor Changes
+
+- b598e3c: Surface structured API errors via a new RequestError class
+
 ## 0.17.0
 
 ### Minor Changes
