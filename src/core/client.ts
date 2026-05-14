@@ -22,6 +22,7 @@ import {
   Metadata,
 } from '../types/files';
 import { ThatOpenContext } from '../types/context';
+import { RequestError } from './request-error';
 
 declare global {
   interface Window {
@@ -340,9 +341,11 @@ export class EngineServicesClient {
         const textResponse = await response
           .text()
           .then((text) => text)
-          .catch(() => undefined);
-        throw new Error(
-          `Request failed with status ${response.status}: ${response.statusText} - ${textResponse}`,
+          .catch(() => '');
+        throw new RequestError(
+          response.status,
+          response.statusText,
+          textResponse,
         );
       }
 
