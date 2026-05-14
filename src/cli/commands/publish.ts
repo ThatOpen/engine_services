@@ -10,6 +10,7 @@ import {
 import { createBundleZip } from '../lib/zip';
 import { declarationsPath, readDeclarations } from '../lib/declarations';
 import { EngineServicesClient } from '../../core/client';
+import { RequestError } from '../../core/request-error';
 
 export const publishCommand = new Command('publish')
   .description('Build and publish the project to the ThatOpen platform')
@@ -148,21 +149,31 @@ export const publishCommand = new Command('publish')
 
         console.log('Published successfully!');
       } catch (err) {
-        const message = (err as Error).message || String(err);
-        if (message.includes('401') || message.includes('403')) {
-          console.error(
-            'Authentication failed. Check your token with `thatopen login`.',
-          );
-        } else if (
-          message.includes('fetch') ||
-          message.includes('ECONNREFUSED')
-        ) {
-          console.error(
-            'Could not connect to the platform. Is the API URL correct?',
-          );
-          console.error(`  API URL: ${config.apiUrl}`);
+        if (err instanceof RequestError) {
+          if (err.code === 'LIMIT_EXCEEDED') {
+            console.error(err.message);
+          } else if (err.status === 401) {
+            console.error(
+              'Authentication failed. Check your token with `thatopen login`.',
+            );
+          } else if (err.status === 403) {
+            console.error(`Permission denied: ${err.message}`);
+          } else {
+            console.error('Upload failed:', err.message);
+          }
         } else {
-          console.error('Upload failed:', message);
+          const message = (err as Error).message || String(err);
+          if (
+            message.includes('fetch') ||
+            message.includes('ECONNREFUSED')
+          ) {
+            console.error(
+              'Could not connect to the platform. Is the API URL correct?',
+            );
+            console.error(`  API URL: ${config.apiUrl}`);
+          } else {
+            console.error('Upload failed:', message);
+          }
         }
         process.exit(1);
       }

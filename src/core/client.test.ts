@@ -224,6 +224,30 @@ describe('EngineServicesClient — HTTP contract', () => {
         client.executeComponent('comp-1', { projectId: 'foreign' }),
       ).rejects.toThrow(/403/);
     });
+
+    it('throws a RequestError exposing status, code and details from the body', async () => {
+      const body = JSON.stringify({
+        message: 'Components limit reached (10/10).',
+        code: 'LIMIT_EXCEEDED',
+        details: { limitType: 'componentsPerAccount', current: 10, max: 10 },
+      });
+      fetchMock.mockResolvedValue({
+        ok: false,
+        status: 403,
+        statusText: 'Forbidden',
+        text: async () => body,
+        json: async () => JSON.parse(body),
+      } as unknown as Response);
+      const client = new EngineServicesClient(TOKEN, API);
+      await expect(client.executeComponent('comp-1', {})).rejects.toMatchObject(
+        {
+          name: 'RequestError',
+          status: 403,
+          code: 'LIMIT_EXCEEDED',
+          message: 'Components limit reached (10/10).',
+        },
+      );
+    });
   });
 
   describe('file version metadata', () => {
