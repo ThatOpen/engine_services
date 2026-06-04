@@ -1,5 +1,5 @@
 import * as OBC from "@thatopen/components";
-import { AppManager } from "thatopen-services";
+import { AppManager } from "@thatopen/services";
 import { CloudRunnerStatus } from "./src";
 
 export class CloudRunner extends OBC.Component {

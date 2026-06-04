@@ -2,7 +2,7 @@
  * Generates a tsconfig.json for local template development inside the
  * engine_services monorepo. This file is git-ignored and must NOT be
  * included when scaffolding a project — it only exists to fix TypeScript's
- * duplicate-package resolution caused by local symlinks (e.g. thatopen-services
+ * duplicate-package resolution caused by local symlinks (e.g. @thatopen/services
  * pointing to the workspace root via `file:../../../..`).
  */
 

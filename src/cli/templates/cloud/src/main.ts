@@ -22,7 +22,7 @@
 
 // Globals injected by the execution engine at runtime — keep these for type checking
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare const thatOpenServices: import("thatopen-services").EngineServicesClient;
+declare const thatOpenServices: import("@thatopen/services").EngineServicesClient;
 declare const executionParams: Record<string, unknown>;
 declare const executionContext: {
   projectId?: string;

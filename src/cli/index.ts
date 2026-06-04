@@ -16,7 +16,7 @@ const pkg = JSON.parse(
 
 let updateMessage: string | undefined;
 
-fetch('https://registry.npmjs.org/thatopen-services/latest', {
+fetch('https://registry.npmjs.org/@thatopen/services/latest', {
   signal: AbortSignal.timeout(3000),
 })
   .then((res) => res.ok && res.json())
@@ -24,7 +24,7 @@ fetch('https://registry.npmjs.org/thatopen-services/latest', {
     if (data?.version && data.version !== pkg.version) {
       updateMessage =
         `\n  ⚠ Update available: ${pkg.version} → ${data.version}` +
-        `\n  Run "npm install -g thatopen-services@latest" to update.\n`;
+        `\n  Run "npm install -g @thatopen/services@latest" to update.\n`;
     }
   })
   .catch(() => {});

@@ -1,6 +1,6 @@
 import * as OBC from "@thatopen/components";
 import * as BUI from "@thatopen/ui";
-import { UIManager } from "thatopen-services";
+import { UIManager } from "@thatopen/services";
 import {
   appInfoSectionTemplate,
   AppInfoSectionState,

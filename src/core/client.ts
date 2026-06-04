@@ -153,7 +153,7 @@ export type EngineServicesClientProps = {
  *
  * @example
  * ```ts
- * import { EngineServicesClient } from 'thatopen-services';
+ * import { EngineServicesClient } from '@thatopen/services';
  *
  * const client = new EngineServicesClient('my-access-token', 'https://api.thatopen.com');
  * const files = await client.listFiles();

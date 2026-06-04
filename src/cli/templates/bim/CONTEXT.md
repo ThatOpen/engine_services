@@ -46,7 +46,7 @@ Always use `npm run dev` which runs `thatopen serve` under the hood.
 | `@thatopen/ui` | `BUI` | UI web components (`<bim-panel>`, `<bim-grid>`, etc.) |
 | `@thatopen/ui-obc` | `CUI` | Pre-built OBC UI tables (used by ModelsPanel) |
 | `three` | `THREE` | 3D rendering engine |
-| `thatopen-services` | `EngineServicesClient` | Platform API client + built-in components |
+| `@thatopen/services` | `EngineServicesClient` | Platform API client + built-in components |
 
 ## Architecture pattern
 
@@ -85,7 +85,7 @@ They are fetched, evaluated, and registered with the OBC component system.
 | **ScreenshotAnnotator** | Modal for annotating screenshots (arrows, text, freehand) via MarkerJS |
 
 **Full API reference**: Each component has detailed JSDoc with `@example` blocks in the
-`thatopen-services` package source (`src/built-in/index.ts`). Read that file for config
+`@thatopen/services` package source (`src/built-in/index.ts`). Read that file for config
 interfaces, method signatures, and code examples.
 
 ### Loading pattern
@@ -93,7 +93,7 @@ interfaces, method signatures, and code examples.
 Use `setup` to create the component system and load built-in components in one call:
 
 ```ts
-import { PlatformClient, AppManager, ViewportsManager } from "thatopen-services";
+import { PlatformClient, AppManager, ViewportsManager } from "@thatopen/services";
 
 const client = PlatformClient.fromPlatformContext();
 

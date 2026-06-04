@@ -1,4 +1,4 @@
-# thatopen-services
+# @thatopen/services
 
 Client library and CLI for the That Open Platform — a cloud platform for building BIM (Building Information Modeling) software.
 
@@ -81,7 +81,7 @@ every request, so Auth0's `getAccessTokenSilently()` and similar
 refreshing sources Just Work:
 
 ```ts
-import { PlatformClient } from 'thatopen-services';
+import { PlatformClient } from '@thatopen/services';
 const client = new PlatformClient(
   () => auth0.getAccessTokenSilently(),
   'https://api.thatopen.com',
@@ -142,7 +142,7 @@ yarn create-version   # Build → changeset → version → publish
 | **Item type** | `APP` | `TOOL` |
 | **Entry point** | Side effects in `main.ts` (renders UI) | `export async function main()` |
 | **Context** | `window.__THATOPEN_CONTEXT__` provides `{ appId, projectId, accessToken, apiUrl }` | Globals: `thatOpenServices`, `executionParams`, `executionContext` (`{ projectId?, executionId, toolId, toolVersion }`), `executionReporter` (`message/error/progress`). `OBC`, `THREE`, `web-ifc`, `fs` are NOT injected — import them and let the bundler include them. |
-| **Build output** | IIFE `dist/bundle.js` (all deps bundled) | IIFE `dist/bundle.js` (only `thatopen-services` externalized) |
+| **Build output** | IIFE `dist/bundle.js` (all deps bundled) | IIFE `dist/bundle.js` (only `@thatopen/services` externalized) |
 | **Template** | `bim`, `default`, or `test` | `cloud` or `cloud-test` |
 
 ### Authentication
@@ -156,7 +156,7 @@ Two modes, controlled by `useBearer` in the constructor:
 Built-in components are platform-hosted UI modules fetched at runtime. Usage pattern:
 
 ```ts
-import { AppManager, ViewportManager } from "thatopen-services";
+import { AppManager, ViewportManager } from "@thatopen/services";
 
 // Register all library globals once
 client.setBuiltInGlobals({ OBC, OBF, BUI, CUI, THREE, FRAGS });

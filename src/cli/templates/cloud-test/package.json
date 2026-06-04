@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@thatopen/components": "~3.4.0",
-    "thatopen-services": "^{{VERSION}}",
+    "@thatopen/services": "^{{VERSION}}",
     "three": "^0.182.0"
   },
   "devDependencies": {
