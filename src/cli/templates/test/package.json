@@ -14,7 +14,7 @@
     "@thatopen/fragments": "~3.4.0",
     "@thatopen/ui": "~3.4.0",
     "@thatopen/ui-obc": "~3.4.0",
-    "thatopen-services": "^{{VERSION}}",
+    "@thatopen/services": "^{{VERSION}}",
     "three": "^0.182.0"
   },
   "devDependencies": {

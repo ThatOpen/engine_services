@@ -95,7 +95,7 @@ export const localServerCommand = new Command('local-server')
           '.webp': 'dataurl',
         },
         external: [
-          'thatopen-services',
+          '@thatopen/services',
           '@thatopen/components',
           'three',
           'web-ifc',

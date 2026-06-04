@@ -1,8 +1,21 @@
 {
-  "name": "thatopen-services",
+  "name": "@thatopen/services",
   "description": "Client library and CLI for building BIM apps and cloud components on the That Open Platform",
+  "author": "That Open Company",
+  "license": "MIT",
+  "homepage": "https://github.com/ThatOpen/engine_services#readme",
+  "bugs": {
+    "url": "https://github.com/ThatOpen/engine_services/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThatOpen/engine_services.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "private": false,
-  "version": "0.18.0",
+  "version": "0.0.2",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -11,7 +24,11 @@
   },
   "files": [
     "dist",
-    "src/cli/templates"
+    "src/cli/templates",
+    "src/built-in",
+    "docs",
+    "AGENTS.md",
+    "CONTEXT.md"
   ],
   "scripts": {
     "dev": "vite",

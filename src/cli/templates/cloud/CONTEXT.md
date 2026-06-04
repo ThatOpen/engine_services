@@ -7,7 +7,7 @@ It runs on the server as a Node.js process, triggered via the platform API.
 
 - **Entry point**: `src/main.ts` — must export an `async function main()`.
 - **Parameter schema**: `declarations.json` — the list of parameters this component accepts. Bundled next to the code so the platform, the UI, and `thatopen run` know what to pass in.
-- **Build output**: `dist/bundle.js` — an IIFE built by Vite with `thatopen-services` externalized.
+- **Build output**: `dist/bundle.js` — an IIFE built by Vite with `@thatopen/services` externalized.
 - **Execution**: The platform (or `thatopen run` locally) wraps the bundle in an execution engine that provides globals and calls `main()`.
 
 ## Parameters (`declarations.json`)
@@ -57,7 +57,7 @@ npx thatopen local-server --port 5000    # Custom port
 Then in your app or test script:
 
 ```ts
-import { EngineServicesClient } from "thatopen-services";
+import { EngineServicesClient } from "@thatopen/services";
 
 const client = new EngineServicesClient(token, apiUrl, {
   localServerUrl: "http://localhost:4001",
@@ -89,7 +89,7 @@ Libraries like `@thatopen/components`, `three`, `web-ifc`, or Node's `fs` are **
 Already declared in `src/main.ts`. Keep them there for type checking:
 
 ```ts
-declare const thatOpenServices: import("thatopen-services").EngineServicesClient;
+declare const thatOpenServices: import("@thatopen/services").EngineServicesClient;
 declare const executionParams: Record<string, unknown>;
 declare const executionContext: {
   projectId?: string;
@@ -197,7 +197,7 @@ if (!hasPermission) {
 ## Build configuration
 
 - `vite.config.js` builds to IIFE format.
-- Only `thatopen-services` is externalized — the wrapper provides it at runtime via `require()`. Everything else (including any third-party npm dependency you install) is bundled into `dist/bundle.js`.
+- Only `@thatopen/services` is externalized — the wrapper provides it at runtime via `require()`. Everything else (including any third-party npm dependency you install) is bundled into `dist/bundle.js`.
 - The build output has a footer `var main = ThatOpenComponent.main;` so the engine can find the entry point as a top-level `main` variable.
 
 ## Configuration

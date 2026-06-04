@@ -12,8 +12,8 @@ import {
   PlatformClient,
   AppManager,
   ViewportManager,
-} from "thatopen-services";
-import type { ThatOpenContext } from "thatopen-services";
+} from "@thatopen/services";
+import type { ThatOpenContext } from "@thatopen/services";
 
 declare global {
   interface Window {

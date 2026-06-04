@@ -58,6 +58,8 @@ export const createCommand = new Command('create')
     const sharedDir = join(templatesDir, 'shared');
     const sharedVariantDir = join(sharedDir, isCloud ? 'cloud' : 'app');
     copyFileSync(join(sharedDir, '_gitignore'), join(targetDir, '.gitignore'));
+    copyFileSync(join(sharedDir, 'AGENTS.md'), join(targetDir, 'AGENTS.md'));
+    copyFileSync(join(sharedDir, 'CLAUDE.md'), join(targetDir, 'CLAUDE.md'));
     copyFileSync(join(sharedVariantDir, 'tsconfig.json'), join(targetDir, 'tsconfig.json'));
     copyFileSync(join(sharedVariantDir, 'vite.config.js'), join(targetDir, 'vite.config.js'));
     if (!isCloud) {
@@ -78,7 +80,7 @@ export const createCommand = new Command('create')
     const pkg = readFileSync(pkgPath, 'utf-8')
       .replace(/\{\{PROJECT_NAME\}\}/g, packageName)
       .replace(/\{\{VERSION\}\}/g, libVersion)
-      .replace(/"thatopen-services": "file:[^"]*"/, `"thatopen-services": "^${libVersion}"`);
+      .replace(/"@thatopen\/services": "file:[^"]*"/, `"@thatopen/services": "^${libVersion}"`);
     writeFileSync(pkgPath, pkg);
 
     // Install dependencies automatically

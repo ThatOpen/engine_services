@@ -1,5 +1,5 @@
 import * as OBC from "@thatopen/components";
-import { ViewportsManager } from "thatopen-services";
+import { ViewportsManager } from "@thatopen/services";
 
 export const viewportsManager = async (components: OBC.Components) => {
   const viewports = components.get(ViewportsManager);

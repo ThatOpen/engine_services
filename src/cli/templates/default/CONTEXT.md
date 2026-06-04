@@ -41,7 +41,7 @@ Always use `npm run dev` which runs `thatopen serve` under the hood.
 To add 3D BIM viewing, install the BIM dependencies:
 
 ```bash
-npm install @thatopen/components @thatopen/ui three thatopen-services
+npm install @thatopen/components @thatopen/ui three @thatopen/services
 ```
 
 Then follow the BIM app pattern:
@@ -53,7 +53,7 @@ import * as OBF from "@thatopen/components-front";
 import * as FRAGS from "@thatopen/fragments";
 import * as BUI from "@thatopen/ui";
 import * as CUI from "@thatopen/ui-obc";
-import { PlatformClient, AppManager, ViewportManager } from "thatopen-services";
+import { PlatformClient, AppManager, ViewportManager } from "@thatopen/services";
 
 const client = PlatformClient.fromPlatformContext();
 const { components } = await client.setup(
@@ -67,10 +67,10 @@ const { element, world } = await viewports.create();
 
 ## EngineServicesClient API
 
-If you install `thatopen-services`, you can make API calls:
+If you install `@thatopen/services`, you can make API calls:
 
 ```ts
-import { PlatformClient } from "thatopen-services";
+import { PlatformClient } from "@thatopen/services";
 
 const client = PlatformClient.fromPlatformContext();
 

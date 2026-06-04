@@ -10,11 +10,11 @@
 //   apiUrl      — base URL for the That Open API
 //
 // To add BIM capabilities (3D viewer, model loading), install:
-//   npm install @thatopen/components @thatopen/ui three thatopen-services
+//   npm install @thatopen/components @thatopen/ui three @thatopen/services
 // Then see the "bim" template for the full pattern.
 
-import { PlatformClient } from "thatopen-services";
-import type { ThatOpenContext, ProjectData } from "thatopen-services";
+import { PlatformClient } from "@thatopen/services";
+import type { ThatOpenContext, ProjectData } from "@thatopen/services";
 
 declare global {
   interface Window {

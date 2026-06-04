@@ -14,7 +14,7 @@ export function buildEngineScript(
   executionParams: object,
 ): string {
   return `/* eslint-disable */
-const { EngineServicesClient } = require('thatopen-services');
+const { EngineServicesClient } = require('@thatopen/services');
 
 const OBC = require('@thatopen/components');
 const THREE = require('three');

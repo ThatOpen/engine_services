@@ -1,4 +1,4 @@
-# thatopen-services
+# @thatopen/services
 
 Client library and CLI for building BIM apps and cloud components on the [That Open Platform](https://platform.thatopen.com).
 
@@ -8,7 +8,7 @@ Client library and CLI for building BIM apps and cloud components on the [That O
 
 ```bash
 # Install the services package globally
-npm i thatopen-services -g
+npm i @thatopen/services -g
 ```
 
 Then, create a brand new app repository:
@@ -58,7 +58,7 @@ Use `npx thatopen create .` to scaffold in the current directory instead of crea
 ## Library usage
 
 ```typescript
-import { EngineServicesClient } from 'thatopen-services';
+import { EngineServicesClient } from '@thatopen/services';
 
 const client = new EngineServicesClient(accessToken, apiUrl);
 
@@ -152,7 +152,7 @@ Cloud components export an `async function main()` that runs on the server. The 
 Platform-hosted UI components loaded at runtime:
 
 ```typescript
-import { AppManager, ViewportManager } from "thatopen-services";
+import { AppManager, ViewportManager } from "@thatopen/services";
 
 // Register all library globals once
 client.setBuiltInGlobals({ OBC, OBF, BUI, CUI, THREE, FRAGS });

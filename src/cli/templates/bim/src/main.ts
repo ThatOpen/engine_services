@@ -10,7 +10,7 @@ import {
   AppManager,
   ViewportsManager,
   UIManager,
-} from "thatopen-services";
+} from "@thatopen/services";
 
 import { getAppManager } from "./app";
 import { uiManager, cloudRunner, viewportsManager, getUIManager } from "./setups";
