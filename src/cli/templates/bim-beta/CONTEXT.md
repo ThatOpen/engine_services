@@ -40,9 +40,9 @@ Always use `npm run dev` which runs `thatopen serve` under the hood.
 
 | Package | Import | Purpose |
 |---------|--------|---------|
-| `@thatopen/components` | `OBC` | BIM engine — components, fragments, worlds |
-| `@thatopen/components-front` | `OBF` | Front-end BIM components (Highlighter, measurements, etc.) |
-| `@thatopen/fragments` | `FRAGS` | Fragment geometry format |
+| `@thatopen-platform/components-beta` | `OBC` | BIM engine — components, fragments, worlds |
+| `@thatopen-platform/components-front-beta` | `OBF` | Front-end BIM components (Highlighter, measurements, etc.) |
+| `@thatopen-platform/fragments-beta` | `FRAGS` | Fragment geometry format |
 | `@thatopen/ui` | `BUI` | UI web components (`<bim-panel>`, `<bim-grid>`, etc.) |
 | `three` | `THREE` | 3D rendering engine |
 | `@thatopen/services` | `EngineServicesClient` | Platform API client + built-in components |
@@ -124,27 +124,27 @@ await client.initBuiltInComponent(AppManager, components);
 | ViewportsManager | `{ OBC, BUI, THREE, FRAGS }` | — |
 | LoadModelButton | `{ OBC, BUI }` | — |
 | ModelsDropdown | `{ OBC, BUI }` | — |
-| ViewerToolbar | `{ OBC, OBF, BUI, THREE }` | `@thatopen/components-front` |
-| ColorsPalette | `{ OBC, OBF, BUI }` | `@thatopen/components-front` |
-| ClashesList | `{ OBC, OBF, BUI, THREE }` | `@thatopen/components-front` |
-| ClassificationsList | `{ OBC, OBF, BUI }` | `@thatopen/components-front` |
+| ViewerToolbar | `{ OBC, OBF, BUI, THREE }` | `@thatopen-platform/components-front-beta` |
+| ColorsPalette | `{ OBC, OBF, BUI }` | `@thatopen-platform/components-front-beta` |
+| ClashesList | `{ OBC, OBF, BUI, THREE }` | `@thatopen-platform/components-front-beta` |
+| ClassificationsList | `{ OBC, OBF, BUI }` | `@thatopen-platform/components-front-beta` |
 | ClippingsList | `{ OBC, BUI }` | — |
-| HighlightersList | `{ OBC, OBF, BUI }` | `@thatopen/components-front` |
-| LengthMeasuringsList | `{ OBC, OBF, BUI, THREE }` | `@thatopen/components-front` |
-| AreaMeasuringsList | `{ OBC, OBF, BUI, THREE }` | `@thatopen/components-front` |
-| QtoComparisonList | `{ OBC, OBF, BUI }` | `@thatopen/components-front` |
-| QueriesHierarchy | `{ OBC, OBF, BUI }` | `@thatopen/components-front` |
+| HighlightersList | `{ OBC, OBF, BUI }` | `@thatopen-platform/components-front-beta` |
+| LengthMeasuringsList | `{ OBC, OBF, BUI, THREE }` | `@thatopen-platform/components-front-beta` |
+| AreaMeasuringsList | `{ OBC, OBF, BUI, THREE }` | `@thatopen-platform/components-front-beta` |
+| QtoComparisonList | `{ OBC, OBF, BUI }` | `@thatopen-platform/components-front-beta` |
+| QueriesHierarchy | `{ OBC, OBF, BUI }` | `@thatopen-platform/components-front-beta` |
 | CustomViewLegend | `{ OBC, BUI }` | — |
 | ScreenshotAnnotator | `{ OBC, BUI, MARKERJS }` | `@markerjs/markerjs3` |
 
 ### Global abbreviations
 
 ```ts
-import * as OBC from "@thatopen/components";
-import * as OBF from "@thatopen/components-front";   // needed for Toolbar, Highlighters, Clashes, etc.
+import * as OBC from "@thatopen-platform/components-beta";
+import * as OBF from "@thatopen-platform/components-front-beta";   // needed for Toolbar, Highlighters, Clashes, etc.
 import * as BUI from "@thatopen/ui";
 import * as THREE from "three";
-import * as FRAGS from "@thatopen/fragments";
+import * as FRAGS from "@thatopen-platform/fragments-beta";
 import * as MARKERJS from "@markerjs/markerjs3";      // needed for ScreenshotAnnotator
 ```
 

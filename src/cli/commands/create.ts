@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, renam
 import { basename, join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 
-const TEMPLATES = ['default', 'bim', 'cloud', 'test', 'cloud-test'] as const;
+const TEMPLATES = ['default', 'bim', 'bim-beta', 'cloud', 'test', 'cloud-test'] as const;
 type Template = (typeof TEMPLATES)[number];
 
 /** Read the library version from package.json so templates stay in sync. */
@@ -83,6 +83,13 @@ export const createCommand = new Command('create')
       .replace(/"@thatopen\/services": "file:[^"]*"/, `"@thatopen/services": "^${libVersion}"`);
     writeFileSync(pkgPath, pkg);
 
+    const isBeta = template === 'bim-beta';
+    if (isBeta) {
+      console.log('');
+      console.log('This template uses the private BETA engine libraries (@thatopen-platform/*-beta).');
+      console.log('If install fails with a 401/403, configure your beta access token in npm first.');
+    }
+
     // Install dependencies automatically
     console.log('');
     console.log('Installing dependencies...');
@@ -90,6 +97,9 @@ export const createCommand = new Command('create')
       execSync('npm install', { cwd: targetDir, stdio: 'inherit' });
     } catch {
       console.error('Failed to install dependencies. Run `npm install` manually.');
+      if (isBeta) {
+        console.error('Beta packages are private — if this is an auth error, your beta token may not be configured.');
+      }
     }
 
     console.log('');

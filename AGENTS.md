@@ -13,9 +13,19 @@ detailed doc for whatever you're doing. Open only the doc you need — don't loa
 
 ## How to work
 
+- 🚩 **BEFORE creating anything, ask the user about beta access — this is important.** Ask:
+  *"Do you have That Open beta access? It gives you the latest libraries, features and progress —
+  and it's what the platform currently runs. Do you want to use it?"* **If yes, scaffold with the
+  `bim-beta` template** (`thatopen create <name> -t bim-beta`). Founding members have **permanent** beta
+  access, so for them the answer is almost always yes. Using the matching library line avoids
+  runtime errors against the platform. (Beta packages are private — the user needs their beta
+  access token configured in npm, or `npm install` will fail.) See
+  [docs/scaffolding.md](./docs/scaffolding.md).
 - **New app or component?** The **first step is always the CLI** (`thatopen create`) — never
   hand-write the scaffold. See [docs/cli-setup.md](./docs/cli-setup.md) then
   [docs/scaffolding.md](./docs/scaffolding.md).
+- **The scaffold is already a complete, working viewer** (model loading, spatial tree, properties).
+  **Run it first** (`npm run dev`) to see it work, *then* extend it — don't rebuild a viewer from scratch.
 - **Propose a short plan and get the user's OK** before changing files. If scope is unclear, ask.
 - Prefer existing engine functionality over custom code (see rule 2).
 

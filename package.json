@@ -15,7 +15,7 @@
     "access": "public"
   },
   "private": false,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -37,7 +37,7 @@
     "build:lib": "tsc && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build:cli": "vite build --config vite.config.cli.mts && node scripts/copy-templates.mjs",
+    "build:cli": "vite build --config vite.config.cli.mts",
     "preview": "vite preview",
     "test:ui": "vite --config test/vite.config.mts",
     "test:cli-build-app": "npm run build:cli && node test/setup-test-app.mjs",

@@ -18,6 +18,13 @@ The complete, up-to-date guides ship with the library. Read them from the instal
 - `node_modules/@thatopen/services/CONTEXT.md` — library API reference (`PlatformClient` vs
   `EngineServicesClient`, permissions)
 
+## Beta libraries
+If you scaffold **another** app, first ask the user whether they have **beta access** and want the
+latest features/progress. If yes, use `thatopen create <name> -t bim-beta` — it scaffolds on the
+private `@thatopen-platform/*-beta` packages (the line the platform runs). Founding members have
+permanent beta access; the beta packages are private, so the user's beta token must be configured
+for `npm install`.
+
 ## This project
 - `CONTEXT.md` (this folder) — the context for *this specific* project.
 - `package.json` scripts — `npm run dev` (preview), `npm run login`, `npm run publish`.

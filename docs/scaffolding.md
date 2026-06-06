@@ -22,10 +22,27 @@ Pass `--template <name>` to choose a template. The default is `bim`.
 
 | Template | When to use |
 |---|---|
-| `bim` (default) | Standard BIM viewer app — Three.js viewport, BIM viewer, platform UI components. This is the right starting point for almost every app. |
+| `bim` (default) | Standard BIM viewer app on the public engine libraries. |
+| `bim-beta` | Same as `bim` but on the private **beta** engine libraries (`@thatopen-platform/*-beta`) — the line the platform currently runs. Use this for founding members (see below). |
 | `default` | Minimal shell — just shows platform context. Use only when you explicitly want to start from scratch without any viewer. |
 
 If no template is specified, use `bim`.
+
+## Beta libraries (founding members) — use the `bim-beta` template
+
+**Before scaffolding, ask the user whether they have beta access** and want the latest engine
+libraries. If so, scaffold with the `bim-beta` template:
+
+```bash
+thatopen create <app-name> -t bim-beta
+```
+
+`bim-beta` is the `bim` viewer wired directly to the private `@thatopen-platform/*-beta` packages —
+the **same library line the platform currently runs**. Prefer it whenever the user has beta access:
+the public `bim` template uses older libraries that can error at runtime against a beta platform.
+
+Founding members have **permanent** beta access. The beta packages are private, so the user must
+have their beta access token configured in npm, or `npm install` will fail with a 401/403.
 
 ## What the scaffold produces
 
