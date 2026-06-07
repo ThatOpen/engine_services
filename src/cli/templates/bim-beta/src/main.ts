@@ -2,6 +2,10 @@ import * as THREE from "three";
 import * as OBC from "@thatopen-platform/components-beta";
 import * as OBF from "@thatopen-platform/components-front-beta";
 import * as FRAGS from "@thatopen-platform/fragments-beta";
+// Inlines the fragments worker so it runs inside the platform's sandboxed iframe
+// (IIFE bundle: no import.meta, no cross-origin fetch). Opt-in — only apps that
+// import this pay the worker's size.
+import "@thatopen-platform/fragments-beta/inline";
 import * as BUI from "@thatopen/ui";
 import * as MARKERJS from "@markerjs/markerjs3"
 import {
