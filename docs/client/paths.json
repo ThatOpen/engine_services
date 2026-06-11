@@ -1,0 +1,38 @@
+[
+  {
+    "path": "src/core/examples/apps.ts",
+    "description": "App lifecycle — list, get with versions, create, download bundle, and archive."
+  },
+  {
+    "path": "src/core/examples/components.ts",
+    "description": "Cloud component lifecycle — list, get with versions, create, update, download bundle, archive, and recover."
+  },
+  {
+    "path": "src/core/examples/execution.ts",
+    "description": "Cloud component execution — trigger, track progress via WebSocket, list, get, and abort executions."
+  },
+  {
+    "path": "src/core/examples/file-metadata.ts",
+    "description": "File metadata and versioning — get, update, and delete per-version metadata; list, archive, recover, and permanently delete versions."
+  },
+  {
+    "path": "src/core/examples/files.ts",
+    "description": "File lifecycle — list, get with versions, create, rename, upload new version, download by version, archive, and recover."
+  },
+  {
+    "path": "src/core/examples/folders.ts",
+    "description": "Folder lifecycle — list, get, create nested folders, list files inside a folder, rename, download as ZIP, archive, and recover."
+  },
+  {
+    "path": "src/core/examples/hidden-files.ts",
+    "description": "Hidden file lifecycle — create, get, list by parent, download, and delete."
+  },
+  {
+    "path": "src/core/examples/icons.ts",
+    "description": "Item icon management — upload, download, and remove icons on any item (file, app, or component)."
+  },
+  {
+    "path": "src/core/examples/permissions.ts",
+    "description": "Permission checks — single and batch permission verification using PlatformClient (requires user JWT, not API token)."
+  }
+]

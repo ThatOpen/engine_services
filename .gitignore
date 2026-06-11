@@ -33,5 +33,8 @@ src/cli/templates/**/tsconfig.json
 # Local testing files
 *.local.dev.*
 
+# Examples config
+src/core/examples/.env
+
 # Vite timestamp files
 *.timestamp-*.mjs

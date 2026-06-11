@@ -33,7 +33,7 @@
   "scripts": {
     "dev": "vite",
     "lint": "eslint src/",
-    "build": "eslint src/ && tsc && vite build && vite build --config vite.config.cli.mts",
+    "build": "eslint src/ && tsc && vite build && vite build --config vite.config.cli.mts && node scripts/generate-cli-docs-paths.mjs && node scripts/generate-client-examples-paths.mjs",
     "build:lib": "tsc && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -45,10 +45,8 @@
     "test:cli-build-component": "npm run build:cli && node test/setup-test-component.mjs",
     "test:cli-run-component": "cd temp/test-component && thatopen run --skip-build",
     "test:cli-serve-component": "cd temp/test-component && thatopen local-server",
-    "test:cli-build-tests": "npm run build:cli && thatopen create-tests temp",
-    "test:cli-serve-tests": "thatopen serve-tests temp",
-    "template:bim": "cd src/cli/templates/bim && npm install && cd ../../../.. && node scripts/generate-template-tsconfig.mjs",
-    "template:bim:dev": "cd src/cli/templates/bim && npm run dev",
+    "template:app": "cd src/cli/templates/app && npm install && cd ../../../.. && node scripts/generate-template-tsconfig.mjs",
+    "template:app:dev": "cd src/cli/templates/app && npm run dev",
     "changeset": "changeset",
     "version": "changeset version"
   },
