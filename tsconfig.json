@@ -20,5 +20,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src", "test.local.dev/clientus.ts"],
-  "exclude": ["src/cli/templates"]
+  "exclude": ["src/cli/templates", "src/built-in"]
 }
