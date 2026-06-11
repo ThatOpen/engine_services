@@ -51,6 +51,8 @@ export interface ThatOpenLocalConfig {
   itemType?: ProjectType;
   /** Path to an icon file (PNG, WebP, or ICO) uploaded on publish. */
   iconPath?: string;
+  /** Whether this project uses beta engine libraries (@thatopen-platform/*-beta). */
+  beta?: boolean;
 }
 
 const LOCAL_CONFIG_FILE = '.thatopen';

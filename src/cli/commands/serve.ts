@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createServer, IncomingMessage, ServerResponse } from 'node:http';
+import { readLocalConfig } from '../lib/config';
+import { BETA_ALIASES } from '../lib/beta';
 
 export const serveCommand = new Command('serve')
   .description(
@@ -18,6 +20,8 @@ export const serveCommand = new Command('serve')
       );
       process.exit(1);
     }
+
+    const isBeta = readLocalConfig(cwd)?.beta === true;
 
     // Resolve the project's vite config to determine the IIFE global name
     const globalName = detectGlobalName(cwd);
@@ -55,6 +59,7 @@ export const serveCommand = new Command('serve')
       outfile: bundlePath,
       sourcemap: true,
       logLevel: 'info',
+      alias: isBeta ? BETA_ALIASES : undefined,
       logOverride: {
         // IIFE format leaves import.meta empty. The only consumer of import.meta
         // in our ecosystem today is @thatopen/fragments' worker URL fallback,
@@ -157,7 +162,7 @@ export const serveCommand = new Command('serve')
     });
 
     server.listen(port, () => {
-      console.log(`Bundle server running at http://localhost:${port}`);
+      console.log(`Bundle server running at http://localhost:${port}${isBeta ? ' (beta mode)' : ''}`);
       console.log('');
       console.log(
         'Open your project on the platform and click the debug button.',

@@ -2,8 +2,9 @@ import { Command } from 'commander';
 import { join } from 'node:path';
 import { createServer, IncomingMessage, ServerResponse } from 'node:http';
 import { Server as SocketIOServer } from 'socket.io';
-import { requireResolvedConfig } from '../lib/config';
+import { requireResolvedConfig, readLocalConfig } from '../lib/config';
 import { ExecutionManager, toExecutionEntity } from '../lib/execution-manager';
+import { BETA_ALIASES } from '../lib/beta';
 
 // ─── JSON Body Parser ─────────────────────────────────────────────
 
@@ -53,8 +54,17 @@ export const localServerCommand = new Command('local-server')
   .action(async (opts: { port: string; skipBuild?: boolean }) => {
     const cwd = process.cwd();
     const config = requireResolvedConfig(cwd);
+    const isBeta = readLocalConfig(cwd)?.beta === true;
     const port = parseInt(opts.port);
     const bundlePath = join(cwd, 'dist', 'bundle.js');
+
+    // When in beta mode, the stable package names are aliased to their beta
+    // equivalents. The external list must also use the beta names so esbuild
+    // marks them as external after alias resolution.
+    const stableExternals = ['@thatopen/components', '@thatopen/fragments'];
+    const externalPackages = isBeta
+      ? stableExternals.map((p) => BETA_ALIASES[p] ?? p)
+      : stableExternals;
 
     // ─── esbuild watch mode ────────────────────────────────
 
@@ -79,6 +89,7 @@ export const localServerCommand = new Command('local-server')
         footer: { js: 'var main = ThatOpenComponent.main;' },
         outfile: bundlePath,
         logLevel: 'info',
+        alias: isBeta ? BETA_ALIASES : undefined,
         logOverride: {
           // Same upstream @nodable/entities duplicate `euro:` key noise
           // silenced in the `serve` command. Cosmetic, no runtime impact.
@@ -96,7 +107,7 @@ export const localServerCommand = new Command('local-server')
         },
         external: [
           '@thatopen/services',
-          '@thatopen/components',
+          ...externalPackages,
           'three',
           'web-ifc',
           'fs',
@@ -252,7 +263,7 @@ export const localServerCommand = new Command('local-server')
 
     server.listen(port, () => {
       console.log('');
-      console.log(`[local-server] Running at http://localhost:${port}`);
+      console.log(`[local-server] Running at http://localhost:${port}${isBeta ? ' (beta mode)' : ''}`);
       console.log('');
       console.log('Usage with EngineServicesClient:');
       console.log('');

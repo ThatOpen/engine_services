@@ -2,8 +2,10 @@ import { Command } from 'commander';
 import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, renameSync, cpSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
+import { updateLocalConfig } from '../lib/config';
+import { BETA_ALIASES } from '../lib/beta';
 
-const TEMPLATES = ['default', 'bim', 'bim-beta', 'cloud', 'test', 'cloud-test'] as const;
+const TEMPLATES = ['app', 'cloud-component'] as const;
 type Template = (typeof TEMPLATES)[number];
 
 /** Read the library version from package.json so templates stay in sync. */
@@ -20,9 +22,10 @@ const templatesDir = join(__dirname, '..', 'src', 'cli', 'templates');
 
 export const createCommand = new Command('create')
   .argument('<project-name>', 'Name of the project to create (use "." for current directory)')
-  .option('-t, --template <template>', `Template (${TEMPLATES.join(', ')})`, 'bim')
+  .option('-t, --template <template>', `Template (${TEMPLATES.join(', ')})`, 'app')
+  .option('--beta', 'Use beta engine libraries (@thatopen-platform/*-beta)')
   .description('Scaffold a new ThatOpen app or cloud component project')
-  .action(async (projectName: string, opts: { template: string }) => {
+  .action(async (projectName: string, opts: { template: string; beta?: boolean }) => {
     const template = opts.template as Template;
 
     if (!TEMPLATES.includes(template)) {
@@ -30,7 +33,7 @@ export const createCommand = new Command('create')
       process.exit(1);
     }
 
-    const isCloud = template === 'cloud' || template === 'cloud-test';
+    const isCloud = template === 'cloud-component';
     const projectKind = isCloud ? 'cloud component' : 'app';
     const useCurrentDir = projectName === '.';
 
@@ -47,7 +50,7 @@ export const createCommand = new Command('create')
       process.exit(1);
     }
 
-    console.log(`Creating ThatOpen ${projectKind} "${packageName}" (template: ${template})...`);
+    console.log(`Creating ThatOpen ${projectKind} "${packageName}" (template: ${template}${opts.beta ? ', beta' : ''})...`);
 
     if (!useCurrentDir) {
       mkdirSync(targetDir, { recursive: true });
@@ -77,29 +80,35 @@ export const createCommand = new Command('create')
 
     // ── Replace placeholders in package.json ─────────────────────
     const pkgPath = join(targetDir, 'package.json');
-    const pkg = readFileSync(pkgPath, 'utf-8')
+    const pkgContent = readFileSync(pkgPath, 'utf-8')
       .replace(/\{\{PROJECT_NAME\}\}/g, packageName)
       .replace(/\{\{VERSION\}\}/g, libVersion)
       .replace(/"@thatopen\/services": "file:[^"]*"/, `"@thatopen/services": "^${libVersion}"`);
-    writeFileSync(pkgPath, pkg);
+    writeFileSync(pkgPath, pkgContent);
 
-    const isBeta = template === 'bim-beta';
-    if (isBeta) {
-      console.log('');
-      console.log('This template uses the private BETA engine libraries (@thatopen-platform/*-beta).');
-      console.log('If install fails with a 401/403, configure your beta access token in npm first.');
+    // ── Beta: swap packages and mark .thatopen ────────────────────
+    if (opts.beta) {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+      for (const [stable, beta] of Object.entries(BETA_ALIASES)) {
+        if (pkg.dependencies?.[stable] !== undefined) {
+          delete pkg.dependencies[stable];
+          pkg.dependencies[beta] = 'latest';
+        }
+      }
+      writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+      updateLocalConfig({ beta: true }, targetDir);
     }
 
     // Install dependencies automatically
     console.log('');
     console.log('Installing dependencies...');
+    if (opts.beta) {
+      console.log('(Beta packages are private — if this fails with 401/403, configure your beta npm token.)');
+    }
     try {
       execSync('npm install', { cwd: targetDir, stdio: 'inherit' });
     } catch {
       console.error('Failed to install dependencies. Run `npm install` manually.');
-      if (isBeta) {
-        console.error('Beta packages are private — if this is an auth error, your beta token may not be configured.');
-      }
     }
 
     console.log('');
