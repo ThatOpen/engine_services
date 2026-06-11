@@ -6,6 +6,8 @@ export interface Item extends Base {
   itemType: ItemType;
   folderId?: ObjectId;
   internalId: string;
+  iconFileId?: string;
+  iconMimeType?: string;
 }
 
 export type ItemType = 'APP' | 'TOOL' | 'HIDDEN' | 'FILE';

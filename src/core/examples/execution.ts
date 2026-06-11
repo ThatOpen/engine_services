@@ -46,13 +46,13 @@ async function main() {
     client.onExecutionProgress(executionId, (data) => {
       if (data.progressUpdate) {
         console.log(`  progress: ${data.progressUpdate.progress}%`);
+        if (data.progressUpdate.result) {
+          console.log(`  result: ${data.progressUpdate.result}`, data.progressUpdate.resultMessage ?? '');
+          resolve();
+        }
       }
       if (data.messageUpdate) {
-        console.log(`  message: ${data.messageUpdate.message}`);
-      }
-      if (data.result) {
-        console.log(`  result: ${JSON.stringify(data.result)}`);
-        resolve();
+        console.log(`  message: ${data.messageUpdate.content}`);
       }
     });
   });
