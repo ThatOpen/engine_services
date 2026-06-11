@@ -65,7 +65,6 @@ Examples of comment-worthy behavior:
 - Truly shared files (`.gitignore`, `AGENTS.md`, `CLAUDE.md`) live in `src/cli/templates/shared/` and are copied first. `AGENTS.md` there is a stub that points scaffolded projects to `node_modules/@thatopen/services/resources/AGENTS.md`.
 - All other template files (`tsconfig.json`, `vite.config.js`, `index.html`, `src/`, etc.) live directly in their template folder (`app/` or `cloud-component/`) and are copied via `cpSync`.
 - The full agent router for scaffolded projects lives in `resources/AGENTS.md` and ships with the npm package — it is **not** the guide for working on this repo (that's `CLAUDE.md`).
-- Template-specific files live in their own folder and are copied on top via `cpSync`.
 - Available templates: `app` and `cloud-component`. The `TEMPLATES` constant in `src/cli/commands/create.ts` is the single source of truth.
 - Beta mode is tracked in `.thatopen` (`beta: true`). The beta ↔ stable package mapping lives in `src/cli/lib/beta.ts` — update it there only.
 - Placeholder `{{PROJECT_NAME}}` and `{{VERSION}}` in `package.json` are replaced at scaffold time.
