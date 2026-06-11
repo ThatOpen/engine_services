@@ -12,11 +12,10 @@ That Open Platform. Read this first.
 
 ## Where the full build guides live
 The complete, up-to-date guides ship with the library. Read them from the installed package:
-- `node_modules/@thatopen/services/AGENTS.md` — the router; **start here**
+- `node_modules/@thatopen/services/resources/AGENTS.md` — the router; **start here**
 - `node_modules/@thatopen/services/docs/` — detailed guides (app wiring, layout, connecting logic
   to UI, building BIM/UI components, cloud components, publishing, icons, colors, …)
-- `node_modules/@thatopen/services/CONTEXT.md` — library API reference (`PlatformClient` vs
-  `EngineServicesClient`, permissions)
+- `CONTEXT.md` (this folder) — library API reference for this specific project
 
 ## Beta libraries
 If you scaffold **another** app, first ask the user whether they have **beta access** and want the

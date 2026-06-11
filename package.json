@@ -27,8 +27,7 @@
     "src/cli/templates",
     "src/built-in",
     "docs",
-    "AGENTS.md",
-    "CONTEXT.md"
+    "resources"
   ],
   "scripts": {
     "dev": "vite",
