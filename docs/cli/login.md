@@ -6,7 +6,12 @@ description: "Authenticate with the ThatOpen platform by validating an access to
 
 Validates an access token against the platform API and saves the credentials. Run this once globally before using any other command, or per-project with `--local`.
 
-To get a token: go to your ThatOpen dashboard → Data → API Tokens → create a new token.
+To get a token:
+1. Go to [https://dev.platform.thatopen.com](https://dev.platform.thatopen.com)
+2. In the header, click **Data**
+3. Find the **Tokens** card and create a new token
+4. Enable the permissions: **Apps**, **Components**, and **Storage**
+5. Copy the token
 
 **Usage:**
 ```bash

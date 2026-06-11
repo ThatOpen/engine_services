@@ -1,5 +1,5 @@
 ---
-description: "Start a local dev server for a browser app. Uses esbuild in watch mode and serves the IIFE bundle on port 4000 with SSE live reload. To preview, open the project on the platform and click the debug button — the platform fetches the bundle from localhost."
+description: "Start a local dev server for a browser app. Uses esbuild in watch mode and serves the IIFE bundle on port 4000 with SSE live reload. To connect: open the project on dev.platform.thatopen.com, click the Local App icon, then Get Started."
 ---
 
 ## thatopen serve
@@ -27,4 +27,17 @@ thatopen serve [flags]
 ```bash
 thatopen serve
 thatopen serve --port 4321
+```
+
+**Connecting the platform to your local server:**
+
+1. Go to [https://dev.platform.thatopen.com](https://dev.platform.thatopen.com) and open a project (create one first if needed).
+2. In the top right corner, click the **Local App** icon.
+3. Click **Get Started**.
+
+The platform loads the bundle from port 4000 and renders the app inside the project context, with full access to its models, data, and users. The dev server must be running before opening this URL — if nothing is served on port 4000, the platform will fail to load the app.
+
+The resulting URL follows this pattern:
+```
+https://dev.platform.thatopen.com/dashboard/projects/{projectId}/apps/local-app
 ```
