@@ -1,9 +1,5 @@
 [
   {
-    "path": "src/built-in/AppManager/example.ts",
-    "description": ""
-  },
-  {
     "path": "src/built-in/CDEManager/example.ts",
     "description": "CDEManager — CDEManager is the central state machine for a Common Data Environment. It holds files, folders, metadata schemas, viewer groups, and user permissions, and exposes a typed state machine that all file operations — selecting, editing, uploading, viewing — route through. It has no DOM or Three.js dependencies and can run in Node, a browser, or a server-side worker wherever `@thatopen/components` is available."
   },
@@ -48,7 +44,27 @@
     "description": ""
   },
   {
-    "path": "src/built-in/ViewportsManager/example.ts",
-    "description": ""
+    "path": "src/built-in/UIManager/src/app/example.ts",
+    "description": "top-app — Front-end developers building BIM web apps need to coordinate several async initialization steps before the UI can be shown — loading the engine, preparing fragment workers, registering loaders — and users need visible feedback on what is happening during that wait, rather than a blank screen."
+  },
+  {
+    "path": "src/built-in/UIManager/src/app/examples/AppState/example.ts",
+    "description": "Shared reactive state with AppState — Developers building interactive BIM panels often need sibling components — a filter selector and a results table, for example — to stay in sync without a shared parent. Lifting state to a common ancestor and threading it down as props works for shallow trees but becomes unwieldy as the component tree grows."
+  },
+  {
+    "path": "src/built-in/UIManager/src/app/examples/Contexts/example.ts",
+    "description": "Consuming platform contexts in child components — Developers building custom BIM panels need access to the 3D engine, the platform API, and the current project's metadata — but threading these objects down through props across multiple component layers forces every intermediate element to know about data it doesn't use, making trees brittle and hard to refactor."
+  },
+  {
+    "path": "src/built-in/UIManager/src/app/examples/FloatingLayout/example.ts",
+    "description": "Floating layout — Developers building BIM coordination tools often want the 3D model to fill the entire window while control panels float above it — but standard grid layouts give every area equal standing, shrinking the viewer into one cell and leaving visible seams between it and the panels."
+  },
+  {
+    "path": "src/built-in/UIManager/src/app/examples/Notifications/example.ts",
+    "description": "Toasts, file drop, and cross-component notifications — Developers building BIM processing UIs need to surface status updates, errors, and file-drop feedback to users from different points in the component tree — but reaching back to the app root to trigger a notification from a deeply nested component requires threading a reference through every layer in between."
+  },
+  {
+    "path": "src/built-in/UIManager/src/app/examples/Sidebar/example.ts",
+    "description": "Sidebar navigation — Product teams building BIM apps often need multiple distinct views — a 3D model viewer, a data browser, a settings screen — but wiring a custom nav bar and managing view transitions from scratch adds complexity before any real feature work begins."
   }
 ]
