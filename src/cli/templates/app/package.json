@@ -9,12 +9,13 @@
     "publish": "thatopen publish"
   },
   "dependencies": {
+    "@lit/context": "^1.1.6",
     "@markerjs/markerjs3": "^3.9.0",
     "@thatopen/components": "~3.4.0",
     "@thatopen/components-front": "~3.4.0",
     "@thatopen/fragments": "~3.4.0",
-    "@thatopen/ui": "~3.4.0",
     "@thatopen/services": "file:../../../..",
+    "@thatopen/ui": "~3.4.0",
     "three": "^0.182.0"
   },
   "devDependencies": {

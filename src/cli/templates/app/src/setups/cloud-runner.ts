@@ -1,13 +1,9 @@
 import * as OBC from "@thatopen/components";
+import { EngineServicesClient } from "@thatopen/services";
 import { CloudRunner } from "../bim-components";
-import { getUIManager } from "./ui-manager";
 
-export const cloudRunner = (components: OBC.Components) => {
+export const setupCloudRunner = (components: OBC.Components, client: EngineServicesClient) => {
   const runner = components.get(CloudRunner);
-  const uis = getUIManager(components);
-
-  // Re-render all appInfoSection instances whenever execution state changes.
-  runner.onExecutionUpdated.add(() => {
-    uis.custom.get("cloudRunnerSection").updateInstances();
-  });
+  runner.client = client;
+  return runner;
 };

@@ -1,5 +1,5 @@
 import * as OBC from "@thatopen/components";
-import { AppManager } from "@thatopen/services";
+import { EngineServicesClient } from "@thatopen/services";
 import { CloudRunnerStatus } from "./src";
 
 export class CloudRunner extends OBC.Component {
@@ -18,17 +18,16 @@ export class CloudRunner extends OBC.Component {
   progress = 0;
   messages: string[] = [];
 
+  // Set this before calling run() — injected from the app setup.
+  client!: EngineServicesClient;
+
   constructor(components: OBC.Components) {
     super(components);
     components.add(CloudRunner.uuid, this);
   }
 
   async run(useLocal: boolean) {
-    // Resolve client at call time via AppManager — never store it as a field.
-    const app = this.components.get(AppManager);
-    const client = app.client;
-
-    client.localServerUrl = useLocal ? this.localServerUrl : null;
+    this.client.localServerUrl = useLocal ? this.localServerUrl : null;
 
     this.status = useLocal ? "Starting (local)..." : "Starting (deployed)...";
     this.progress = 0;
@@ -36,15 +35,14 @@ export class CloudRunner extends OBC.Component {
     this._trigger();
 
     try {
-      const { executionId } = await client.executeComponent(this.componentId, {
+      const { executionId } = await this.client.executeComponent(this.componentId, {
         greeting: "Hello from the BIM app!",
       });
 
       this.status = `Running (${executionId.slice(0, 8)}...)`;
       this._trigger();
 
-      // Subscribe to real-time progress updates via WebSocket.
-      client.onExecutionProgress(executionId, (data) => {
+      this.client.onExecutionProgress(executionId, (data) => {
         if (data.progressUpdate) {
           this.progress = data.progressUpdate.progress;
           if (data.progressUpdate.result) {
@@ -57,11 +55,9 @@ export class CloudRunner extends OBC.Component {
         this._trigger();
       });
 
-      // Poll once after a short delay to catch fast executions that complete
-      // before the WebSocket subscription is established.
       setTimeout(async () => {
         try {
-          const exec = await client.getExecution(executionId);
+          const exec = await this.client.getExecution(executionId);
           if (exec.result) {
             this.progress = exec.progress;
             this.status = `${exec.result}: ${exec.resultMessage ?? "Done"}`;
@@ -75,7 +71,7 @@ export class CloudRunner extends OBC.Component {
       this.status = `Error: ${err}`;
       this._trigger();
     } finally {
-      client.localServerUrl = null;
+      this.client.localServerUrl = null;
     }
   }
 
