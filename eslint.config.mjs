@@ -3,7 +3,7 @@ import tseslint from "typescript-eslint";
 
 
 export default [
-  { ignores: ["coverage/", "public/", "dist/", "src/cli/templates/**/dist/", "src/built-in/"] },
+  { ignores: ["coverage/", "public/", "dist/", "src/cli/templates/", "src/built-in/"] },
   { languageOptions: { globals: globals.browser } },
   ...tseslint.configs.recommended,
   {
