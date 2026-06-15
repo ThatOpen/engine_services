@@ -22,6 +22,7 @@ import {
   Metadata,
 } from '../types/files';
 import { ThatOpenContext } from '../types/context';
+import { NpmCredentials } from '../types/npm';
 import { RequestError } from './request-error';
 
 declare global {
@@ -34,6 +35,7 @@ declare global {
 const FOLDER_PATH = 'item/folder';
 const ITEM_PATH = 'item';
 const PROCESS_PATH = 'processor';
+const NPM_REGISTRY_PATH = 'npm-registry';
 const HIDDEN_PATH = 'hidden';
 const ITEM_TYPE_FILE = 'FILE';
 const ITEM_TYPE_COMPONENT = 'TOOL';
@@ -1009,6 +1011,23 @@ export class EngineServicesClient {
    */
   async archiveApp(appId: string) {
     return await this.#requestApi<AppItem>('DELETE', `${ITEM_PATH}/${appId}`);
+  }
+
+  // ─── NPM Registry ────────────────────────────────────────────────
+
+  /**
+   * Fetches read-only npm credentials for the private `@thatopen` Founders
+   * beta packages. Gated server-side on the token owner's membership tier:
+   * FOUNDING members (and admins) get the token; everyone else gets a 403
+   * (`RequestError` with `status === 403`). The returned `npmrc` is a
+   * ready-to-write `.npmrc` body the CLI drops into a scaffolded project.
+   * @returns The registry, scope, read-only token, and assembled `.npmrc`.
+   */
+  async getNpmCredentials() {
+    return await this.#requestApi<NpmCredentials>(
+      'GET',
+      `${NPM_REGISTRY_PATH}/credentials`,
+    );
   }
 
   // ─── Execution ───────────────────────────────────────────────────

@@ -407,4 +407,34 @@ describe('EngineServicesClient — HTTP contract', () => {
       );
     });
   });
+
+  describe('getNpmCredentials', () => {
+    it('GETs /api/npm-registry/credentials with the access token', async () => {
+      fetchMock.mockResolvedValue(
+        okResponse({
+          registry: 'https://registry.npmjs.org/',
+          scope: '@thatopen-platform',
+          token: 'npm_ro',
+          npmrc: '@thatopen-platform:registry=https://registry.npmjs.org/\n',
+        }),
+      );
+      const client = new EngineServicesClient(TOKEN, API);
+      const creds = await client.getNpmCredentials();
+      const { url } = getCall(fetchMock);
+      const { pathname, params } = parseUrl(url);
+      expect(pathname).toBe('/api/npm-registry/credentials');
+      expect(params.get('accessToken')).toBe(TOKEN);
+      expect(creds.scope).toBe('@thatopen-platform');
+    });
+
+    it('throws a RequestError with status 403 for non-Founding accounts', async () => {
+      fetchMock.mockResolvedValue(
+        errorResponse(403, 'Community membership required'),
+      );
+      const client = new EngineServicesClient(TOKEN, API);
+      await expect(client.getNpmCredentials()).rejects.toMatchObject({
+        status: 403,
+      });
+    });
+  });
 });

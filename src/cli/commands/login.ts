@@ -1,6 +1,7 @@
 import { Command } from 'commander';
-import { writeConfig, updateLocalConfig } from '../lib/config';
+import { writeConfig, updateLocalConfig, readLocalConfig } from '../lib/config';
 import { EngineServicesClient } from '../../core/client';
+import { setupNpmrc } from '../lib/npmrc';
 
 export const loginCommand = new Command('login')
   .description('Authenticate with the ThatOpen platform')
@@ -37,8 +38,9 @@ export const loginCommand = new Command('login')
 
     console.log('Validating token...');
 
+    const client = new EngineServicesClient(opts.token, apiUrl);
+
     try {
-      const client = new EngineServicesClient(opts.token, apiUrl);
       await client.listApps();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -55,5 +57,14 @@ export const loginCommand = new Command('login')
       console.log(
         'Logged in successfully. Config saved to ~/.thatopen/config.json',
       );
+    }
+
+    // In a beta project, refresh .npmrc so a rotated Founders token propagates
+    // on the next login. Best-effort — never blocks login.
+    if (readLocalConfig()?.beta) {
+      const result = await setupNpmrc(client, process.cwd());
+      if (result.status === 'written') {
+        console.log(`Beta access refreshed — updated .npmrc for ${result.scope}.`);
+      }
     }
   });
