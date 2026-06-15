@@ -1,5 +1,12 @@
 # thatopen-services
 
+## 0.1.2
+
+### Patch Changes
+
+- 067b1af: Republish attempt — ship `createHiddenFilesBatch` to npm now that publish
+  credentials are configured.
+
 ## 0.1.1
 
 ### Patch Changes
