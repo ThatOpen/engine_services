@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 import { readLocalConfig, updateLocalConfig } from '../lib/config';
 import { BETA_ALIASES } from '../lib/beta';
+import { configureBetaNpmrc } from '../lib/npmrc';
 
 export const swapCommand = new Command('swap')
   .description('Toggle between stable public and beta engine libraries')
@@ -63,10 +64,10 @@ export const swapCommand = new Command('swap')
     updateLocalConfig({ beta: targetBeta }, cwd);
 
     console.log(`Switched to ${targetBeta ? 'beta' : 'stable'} libraries.`);
+
+    // Beta packages are private — write an authenticated .npmrc before install.
     if (targetBeta) {
-      console.log(
-        'Beta packages are private — make sure your beta npm token is configured.',
-      );
+      await configureBetaNpmrc(cwd);
     }
 
     console.log('');

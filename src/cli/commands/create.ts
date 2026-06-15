@@ -2,44 +2,9 @@ import { Command } from 'commander';
 import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, renameSync, cpSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
-import { resolveConfig, updateLocalConfig } from '../lib/config';
+import { updateLocalConfig } from '../lib/config';
 import { BETA_ALIASES } from '../lib/beta';
-import { EngineServicesClient } from '../../core/client';
-import { setupNpmrc } from '../lib/npmrc';
-
-/**
- * Beta packages are private, so `npm install` needs an authenticated `.npmrc`.
- * If the user is already logged in (global or local config), fetch the Founders
- * npm credentials and write `.npmrc` before installing. Best-effort: prints a
- * hint and continues when not logged in / not entitled / on error.
- */
-async function writeBetaNpmrc(targetDir: string): Promise<void> {
-  const config = resolveConfig(targetDir);
-  if (!config) {
-    console.log(
-      '  Beta libraries are private. Run `thatopen login --token <token>` then',
-    );
-    console.log(
-      '  `npm install`, or add your beta npm token to .npmrc manually.',
-    );
-    return;
-  }
-  const client = new EngineServicesClient(config.accessToken, config.apiUrl);
-  const result = await setupNpmrc(client, targetDir);
-  if (result.status === 'written') {
-    console.log(`  Beta access configured — wrote .npmrc for ${result.scope}.`);
-  } else if (result.status === 'forbidden') {
-    console.log(
-      '  Your account is not a Founding member — beta libraries need Founding',
-    );
-    console.log('  access, so the install below will fail until you have it.');
-  } else {
-    console.log(
-      `  Could not fetch beta npm credentials (${result.message}). Set your`,
-    );
-    console.log('  token in .npmrc manually if the install fails.');
-  }
-}
+import { configureBetaNpmrc } from '../lib/npmrc';
 
 const TEMPLATES = ['app', 'cloud-component'] as const;
 type Template = (typeof TEMPLATES)[number];
@@ -131,7 +96,7 @@ export const createCommand = new Command('create')
 
     // ── Beta: authenticate private installs via .npmrc ───────────
     if (opts.beta) {
-      await writeBetaNpmrc(targetDir);
+      await configureBetaNpmrc(targetDir);
     }
 
     // Install dependencies automatically

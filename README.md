@@ -29,6 +29,19 @@ To use beta engine libraries instead of the stable ones, see:
 
 Once scaffolded, open `AGENTS.md` in the scaffolded project root — it has everything needed to start building.
 
+## Beta engine libraries (Founding Members)
+
+Founding Members get early access to the private beta engine libraries (`@thatopen-platform/*-beta`). The CLI configures access automatically — no npm account or manual token needed.
+
+```bash
+thatopen login --token <your-token>   # API token from the dashboard → Data → API Tokens
+thatopen create my-app --beta         # new project on the beta libraries
+# or, in an existing project:
+thatopen swap --beta                  # toggle the current project to beta
+```
+
+On `--beta`, the CLI fetches your read-only beta npm credentials and writes them to the project's `.npmrc`, so `npm install` resolves the private packages. The `.npmrc` is gitignored — it carries a credential, so don't commit or share it. Access is tied to your membership; non-Founding accounts get a clear message and the project is still created.
+
 ## What's in this repository
 
 - **Library** — `EngineServicesClient` and `PlatformClient` for interacting with the That Open API (files, folders, apps, cloud components, executions, permissions).
