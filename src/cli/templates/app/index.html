@@ -8,6 +8,14 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; }
     #that-open-app { width: 100%; height: 100%; }
+    /* Scrollbar rail = the panel surface (#262629). Every panel (app .xxx-vp
+       tracks) and every bim-* shadow-DOM scrollbar reads var(--bim-scrollbar--bgc,
+       …), so defining it once here makes all rails match the surface instead of
+       falling back to the lighter bg-contrast-40 (#5F5F64).
+       NOTE: must use --bim-ui_gray-1 (defined UNCONDITIONALLY at :root = #262629),
+       not --bim-ui_bg-contrast-* (only defined under @media/theme-class scopes, so
+       it doesn't resolve at <html>:root and left --bim-scrollbar--bgc unset). */
+    :root { --bim-scrollbar--bgc: var(--bim-ui_gray-1, #262629); }
   </style>
 </head>
 <body>

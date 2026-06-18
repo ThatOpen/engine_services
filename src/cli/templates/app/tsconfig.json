@@ -10,8 +10,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "strict": true,
-    "experimentalDecorators": true
+    "strict": true
   },
   "include": ["src"]
 }

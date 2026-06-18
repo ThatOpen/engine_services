@@ -17,7 +17,11 @@
     "@thatopen/fragments": "~3.4.0",
     "@thatopen/services": "file:../../../..",
     "@thatopen/ui": "~3.4.0",
-    "three": "^0.182.0"
+    "three": "^0.182.0",
+    "@sparkjsdev/spark": "^0.1.10",
+    "3d-tiles-renderer": "^0.4.28",
+    "camera-controls": "^3.1.2",
+    "web-ifc": "^0.0.77"
   },
   "devDependencies": {
     "@types/three": "^0.182.0",
