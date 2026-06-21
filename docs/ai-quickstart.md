@@ -24,6 +24,9 @@ npm install -g @thatopen/services@latest
 
 ## 2. Log in (do this BEFORE creating the project)
 
+Get the token from the platform dashboard — **https://platform.thatopen.com/dashboard/data**
+→ **API Tokens** → create → copy. Ask the user to paste it, then run:
+
 ```bash
 thatopen login --token <platform-token>
 ```
