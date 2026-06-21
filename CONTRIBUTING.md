@@ -15,22 +15,6 @@ npm run build:lib      # Library only
 npm run build:cli      # CLI only
 ```
 
-### Testing the CLI locally
-
-```bash
-# Link the CLI globally so `thatopen` points to this repo
-npm link
-
-# Build CLI and scaffold a test app
-npm run test:cli-build-app
-
-# Build and scaffold a test cloud component
-npm run test:cli-build-component
-
-# Run the test cloud component locally
-npm run test:cli-run-component
-```
-
 ### Publishing a new version
 
 Publishing is handled automatically by CI when a PR with changesets is merged to `main`.
