@@ -45,6 +45,14 @@ async function main() {
   // visibility/inspect toolbar (see below), so the platform default would just
   // duplicate it.
   const viewerEl = document.createElement("top-viewer");
+  // Frame the viewport to match the side panels (BUI bim-panel host = 1px border
+  // + 0.75rem radius). top-viewer's host is already overflow:hidden, so the
+  // radius clips the canvas corners; border-box keeps the 1px inside the grid
+  // area. Done here (not in top-viewer) so the CDE's top-file-viewer, which draws
+  // its own frame, never double-borders.
+  viewerEl.style.border = "1px solid var(--bim-ui_bg-contrast-20)";
+  viewerEl.style.borderRadius = "0.75rem";
+  viewerEl.style.boxSizing = "border-box";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const app = document.createElement("top-app") as any;
@@ -169,8 +177,8 @@ async function main() {
   // Navigation gizmo is now baked into <top-viewer> (setupViewerTools), so the
   // app no longer mounts it. (Cascade: the rest of the overlay tools follow.)
 
-  // Auto-load one model (top-viewer's world wires fragments→scene itself).
-  void autoLoadFirstModel(components, client);
+  // No auto-load: the viewer opens empty. Users add models from the Assets
+  // (files) panel — top-models-list loads the .frag they pick into the world.
 }
 
 /** Resolves with the first world once it exists (top-viewer creates it async). */
@@ -186,38 +194,6 @@ function firstWorld(worlds: any): Promise<any> {
     };
     worlds.list.onItemSet.add(handler);
   });
-}
-
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function autoLoadFirstModel(components: OBC.Components, client: any) {
-  const fragments = components.get(OBC.FragmentsManager);
-  const projectId: string | undefined = client?.context?.projectId;
-  if (!projectId) {
-    console.warn("[a2] no projectId — skipping auto-load");
-    return;
-  }
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const items = (await client.listFiles({ projectId })) as any[];
-    const frags = items.filter((it) =>
-      (it.name ?? "").toLowerCase().endsWith(".frag"),
-    );
-    const frag =
-      frags.find((it) => (it.name ?? "").toLowerCase().includes("bloxhub")) ??
-      frags[0];
-    if (!frag) {
-      console.warn("[a2] no .frag in project to auto-load");
-      return;
-    }
-    const resp = await client.downloadFile(String(frag._id));
-    const buffer = await resp.arrayBuffer();
-    await fragments.core.load(buffer, { modelId: String(frag._id) });
-    await fragments.core.update(true);
-    console.log("[a2] auto-loaded model:", frag.name);
-  } catch (error) {
-    console.warn("[a2] auto-load failed", error);
-  }
 }
 
 main().catch(console.error);
