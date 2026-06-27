@@ -1258,6 +1258,31 @@ export class EngineServicesClient {
   }
 
   /**
+   * Mints a short-lived presigned URL for a hidden file so the browser can
+   * stream it directly from storage with native HTTP `Range` requests (e.g. a
+   * point-cloud `octree.bin`), instead of proxying the whole object through the
+   * API. Re-call to re-mint when the URL nears/passes `expiresAt`; coalesce
+   * concurrent re-mints into a single in-flight call.
+   *
+   * The storage bucket's CORS must allow the `Range` request header and expose
+   * `Content-Range`, `Accept-Ranges` and `Content-Length` for the ranged fetch
+   * to succeed cross-origin.
+   *
+   * @param hiddenId - The hidden file's unique identifier.
+   * @param expiresIn - Desired URL lifetime in seconds (60–3600). Defaults to
+   *   900 (15 min) server-side; values are clamped to that range.
+   * @returns `{ url, expiresAt }` — `url` is the presigned GET URL, `expiresAt`
+   *   an ISO timestamp when it stops working.
+   */
+  async getHiddenFileSignedUrl(hiddenId: string, expiresIn?: number) {
+    return await this.#requestApi<{ url: string; expiresAt: string }>(
+      'GET',
+      `${ITEM_PATH}/${HIDDEN_PATH}/${hiddenId}/signed-url`,
+      { ...(expiresIn != null && { query: { expiresIn } }) },
+    );
+  }
+
+  /**
    * Lists all hidden files attached to a parent item.
    * @param parentFileId - The parent item's unique identifier.
    * @returns Array of hidden file entities.
