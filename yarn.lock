@@ -3026,10 +3026,10 @@ three-mesh-bvh@0.9.9:
   resolved "https://registry.yarnpkg.com/three-mesh-bvh/-/three-mesh-bvh-0.9.9.tgz#273be4a3d4a4a287e6be2d947237e47657f84183"
   integrity sha512-FJKitcjvbALmeQRK+Sc+nLGorCpkrZBrbgJZFzhdyWboak37DZikn46hvQkNqSbJPm227ahYmS6k3N/GXaAyXw==
 
-three@^0.182.0:
-  version "0.182.0"
-  resolved "https://registry.npmjs.org/three/-/three-0.182.0.tgz"
-  integrity sha512-GbHabT+Irv+ihI1/f5kIIsZ+Ef9Sl5A1Y7imvS5RQjWgtTPfPnZ43JmlYI7NtCRDK9zir20lQpfg8/9Yd02OvQ==
+three@>=0.182.0:
+  version "0.185.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.185.0.tgz#1b60dc42a042712a79961b2a654617fd6bb2503b"
+  integrity sha512-+yRrcRO2iZa8uzvNNl0d7cL4huhgKgBvVJ0njcTe8xFqZ6DMAFZdCKDP91SEAuj25bNAj7k1QQdf+srZywVK6w==
 
 tinybench@^2.9.0:
   version "2.9.0"
