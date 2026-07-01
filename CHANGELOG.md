@@ -6,6 +6,8 @@
 
 - Add `getHiddenFileSignedUrl(hiddenId, expiresIn?)` to the client — returns a short-lived signed URL so large hidden files (e.g. a point cloud's `octree.bin`) can be fetched directly with native HTTP `Range` requests instead of downloading the whole object.
 
+- Fix scaffolded apps failing to build with `Dynamic require of "https://cdn.jsdelivr.net/npm/…/+esm" is not supported`. Some three.js example loaders (e.g. `TTFLoader`, pulled in by `components-front-beta`) import their deps from a jsdelivr `/+esm` CDN URL, which a bundler can't place in an IIFE. `thatopen serve` and the app template's `vite build` now rewrite such URLs to the local package; the template also depends on `opentype.js` and pins `three` to `0.185.0` so a future three release can't reintroduce a different CDN import.
+
 ## 0.2.0
 
 ### Minor Changes
