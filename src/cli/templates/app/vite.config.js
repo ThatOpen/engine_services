@@ -23,9 +23,21 @@ function getBetaAliases() {
   }
 }
 
+// Some three.js example loaders (e.g. TTFLoader) import their deps from a
+// jsdelivr `/+esm` CDN URL. A bundler can't put a URL import in an IIFE — it
+// degrades to a runtime `require("https://…")` that throws — so rewrite any such
+// URL back to the bare package name and let it resolve from node_modules.
+const CDN_ESM = /^https:\/\/cdn\.jsdelivr\.net\/npm\/((?:@[^/]+\/)?[^@/]+)(?:@[^/]+)?\/\+esm$/;
+
 export default defineConfig({
   resolve: {
-    alias: getBetaAliases(),
+    alias: [
+      { find: CDN_ESM, replacement: '$1' },
+      ...Object.entries(getBetaAliases()).map(([find, replacement]) => ({
+        find,
+        replacement,
+      })),
+    ],
   },
   build: {
     lib: {

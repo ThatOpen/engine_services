@@ -87,6 +87,37 @@ export const serveCommand = new Command('serve')
       },
       plugins: [
         {
+          // Some three.js example loaders (e.g. TTFLoader) import their deps from
+          // a jsdelivr `/+esm` CDN URL. esbuild can't put a URL import in an IIFE
+          // — it degrades to a runtime `require("https://…")` that throws — so
+          // rewrite any such URL back to the bare package name and resolve it
+          // from the project's node_modules.
+          name: 'cdn-esm-to-local',
+          setup(build) {
+            const CDN_ESM =
+              /^https:\/\/cdn\.jsdelivr\.net\/npm\/((?:@[^/]+\/)?[^@/]+)(?:@[^/]+)?\/\+esm$/;
+            build.onResolve(
+              { filter: /^https:\/\/cdn\.jsdelivr\.net\/npm\// },
+              async (args) => {
+                const match = args.path.match(CDN_ESM);
+                if (!match) return null;
+                const resolved = await build.resolve(match[1], {
+                  kind: args.kind,
+                  resolveDir: args.resolveDir,
+                });
+                if (resolved.errors.length > 0) {
+                  return { errors: resolved.errors };
+                }
+                return {
+                  path: resolved.path,
+                  external: resolved.external,
+                  sideEffects: resolved.sideEffects,
+                };
+              },
+            );
+          },
+        },
+        {
           name: 'reload',
           setup(build) {
             build.onEnd((result) => {
